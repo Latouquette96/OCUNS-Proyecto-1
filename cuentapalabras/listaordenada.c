@@ -6,6 +6,7 @@
 * Archivo implementación del TDA Lista.
 * El TDA LISTA almacenará elementos pares de la forma <cadena_de_caracteres, entero>.
 * La lista es una lista sin centinela con posición indirecta.
+* La lista a implementar es una lista ordenada.
 *
 * Comision N°XX (David Emanuel Latouquette - Otto)
 */
