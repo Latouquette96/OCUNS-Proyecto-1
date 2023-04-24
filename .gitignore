@@ -1,5 +1,7 @@
 /bin
 /obj
 *.o
-*.layout
 *.exe
+*.depend
+cuentapalabras/cuentapalabras.layout
+*.layout
