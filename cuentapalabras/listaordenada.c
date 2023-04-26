@@ -27,7 +27,13 @@ struct lista {
 * Crea una lista vacía y la devuelve.
 */
 lista_t *lista_crear(){
+    //Reservación de memoria para una lista.
     lista_t *L = (struct lista*)malloc(sizeof(struct lista));
+    //Si no se realiza la reservación de memoria, entonces se interrumpe la ejecución del programa.
+    if (L==NULL){
+        exit(ERROR_LISTA_MEMORIA);
+    }
+    //Actualiza los atributos de la lista para modelar una lista vacía.
     L->primera = NULL;
     L->cantidad = 0;
 
@@ -168,9 +174,44 @@ elemento_t *lista_elemento(lista_t *l, unsigned int pos){
 }
 
 /**
+* Procedimiento auxiliar para ordenar la lista.
+* Realiza el ordenamiento de manera recursiva, ordenando los primeros n=pos_final elementos de acuerdo a la función comparación.
+*/
+elemento_t ordenar_auxiliar(celda_t *celda_actual, int pos_inicial, int pos_final, funcion_comparacion_t comparar){
+    //Si se llegó al final
+    if (pos_inicial==pos_final){
+        return celda_actual->elem;
+    }
+    else{
+        celda_t *celda_sgte = celda_actual->siguiente;
+        elemento_t elem_actual = celda_actual->elem;
+        elemento_t elem_ordenar = ordenar_auxiliar(celda_actual->siguiente, pos_inicial+1, pos_final, comparar);
+
+        if (comparar(&elem_actual, &elem_ordenar)==ELEM1_MAYOR_QUE_ELEM2){
+            celda_sgte->elem = elem_actual;
+            celda_actual->elem = elem_ordenar;
+        }
+        else{
+            elem_ordenar = elem_actual;
+        }
+
+        return elem_ordenar;
+    }
+}
+
+/**
 * Dada la lista 'l' y la función 'comparar' ordena la lista de acuerdo al criterio de dicha función.
 */
-int lista_ordenar(lista_t *l, funcion_comparacion_t comparar);
+int lista_ordenar(lista_t *l, funcion_comparacion_t comparar){
+    int n = l->cantidad;
+
+    ///Cantidad de repeticiones igual a la cantidad de elementos a ordenar.
+    for (int i=0; i<n; i++){
+        ordenar_auxiliar(l->primera, 0, i, comparar);
+    }
+
+    return TRUE;
+}
 
 /**
 * Devuelve la cantidad de elementos de la lista 'l'.
