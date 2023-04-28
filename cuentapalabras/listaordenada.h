@@ -1,76 +1,111 @@
-/*
-* Archivo encabezado del TDA Lista.
-* El TDA LISTA almacenar· elementos pares de la forma <cadena_de_caracteres, entero>.
-* La lista es una lista sin centinela con posiciÛn indirecta.
+/**
+* @file listaordenada.h
+* @brief Archivo encabezado del TDA Lista.
+* El TDA LISTA almacenar√° elementos pares de la forma <cadena_de_caracteres, entero>.
+* La lista es una lista sin centinela con posici√≥n indirecta.
 *
-* Comision N∞XX (David Emanuel Latouquette - Otto)
+* @author Comisi√≥n N¬∞17 (David Emanuel Latouquette - Otto Krause)
 */
+
 #ifndef LISTAORDENADA_H_INCLUDED
 #define LISTAORDENADA_H_INCLUDED
 
+#include "define.h"
+
+//Constantes para representar los posibles errores de memoria en las operaciones del TDA Lista.
 #define ERROR_LISTA_BUSQUEDA -1
 #define ERROR_LISTA_ELIMINAR -2
 #define ERROR_LISTA_MEMORIA -3
 
-#define TRUE 1
-#define FALSE 0
-
+/**
+ * @enum enum
+ * @brief Modela los posibles resultados que puede implicar una comparaci√≥n de dos elementos.
+*/
 typedef enum{
     ELEM1_MAYOR_QUE_ELEM2,
     ELEM1_IGUAL_QUE_ELEM2,
     ELEM1_MENOR_QUE_ELEM2
 } comparacion_resultado_t;
 
+/**
+ * @struct elemento.
+ * @brief Modela un elemento que tendr√° como valor a la cantidad de repeticiones de una palabra 
+ * y el valor b ser√° un puntero a la palabra en cuesti√≥n.
+*/
 struct elemento {
     int a;
     char *b;
 };
 typedef struct elemento elemento_t;
 
+/**
+ * @typedef comparacion_resultado_t(funcion_comparacion_t)
+ * @brief Plantilla de funcion para la comparaci√≥n de dos elementos.
+*/
 typedef comparacion_resultado_t (funcion_comparacion_t)(
     elemento_t *elem1,
     elemento_t *elem2
 );
-
 typedef struct lista lista_t;
 
+
 /**
-* Crea una lista vacÌa y la devuelve.
+* @brief Crea una lista vac√≠a y la devuelve.
+* Finaliza el programa con ERROR_LISTA_MEMORIA si no se logra reservar memoria para la lista.
+* @return Puntero a una lista con memoria reservada.
 */
 extern lista_t *lista_crear();
 
 /**
-* Inserta el elemento 'elem' en la posiciÛn 'pos' de la lista (Asumo que la posicion 'pos' comienza desde 0).
-* Retorna:
-*   ERROR_LISTA_MEMORIA si no se reservÛ memoria.
-*   ERROR_LISTA_BUSQUEDA si se pasÛ una posicion fuera de rango.
-*   TRUE si se insertÛ el elemento correctamente.
+* @brief Inserta el elemento 'elem' en la posici√≥n 'pos' de la lista (Asumo que la posicion 'pos' comienza desde 0).
+* @param l Puntero a la lista de elementos.
+* @param elem Elemento a insertar en la lista.
+* @param pos Entero positivo que indica la posicion de inserci√≥n (0<pos<n, donde n es el tama√±o de la lista).
+* @return
+*   ERROR_LISTA_MEMORIA si no se reserva memoria.
+*   ERROR_LISTA_BUSQUEDA si se pasa una posicion fuera de rango.
+*   TRUE si se inserta el elemento correctamente.
 */
 extern int lista_insertar(lista_t *l, elemento_t elem, unsigned int pos);
 
 /**
-* Elimina el elemento de la posiciÛn 'pos' de la lista.
+* @brief Elimina el elemento de la posici√≥n 'pos' de la lista y lo retorna. 
+* @param l Puntero a la lista de elementos.
+* @param pos Entero positivo que indica la posicion a eliminar (0<pos<n, donde n es el tama√±o de la lista).
+* @return El elemento removido de la lista en caso de que la posici√≥n pertenezca a la lista (esto es, para una lista de n elemntos, pos<n), 
+de lo contrario, retorna NULL.
 */
 extern elemento_t *lista_eliminar(lista_t *l, unsigned int pos);
 
 /**
-* Devuelve un puntero al elemento que ocupa la posiciÛn 'pos' de la lista.
+* @brief Devuelve un puntero al elemento que ocupa la posici√≥n 'pos' de la lista.
+* @param l Puntero a la lista de elemntos.
+* @param pos Entero positivo que indica la posicion (0<pos<n, donde n es el tama√±o de la lista).
+* @return El elemento de la posici√≥n 'pos' (esto es, para una lista de n elemntos, pos<n), 
+de lo contrario, retorna NULL.
 */
 extern elemento_t *lista_elemento(lista_t *l, unsigned int pos);
 
 /**
-* Dada la lista 'l' y la funciÛn 'comparar' ordena la lista de acuerdo al criterio de dicha funciÛn.
+* @brief Dada la lista 'l' y la funci√≥n 'comparar' ordena la lista de acuerdo al criterio de dicha funci√≥n.
+* @param l Puntero a la lista de elementos.
+* @param comparar Funci√≥n de comparaci√≥n de elementos.
+* @return TRUE si la lista fue ordenada con exito, de lo contrario, false.
 */
 extern int lista_ordenar(lista_t *l, funcion_comparacion_t comparar);
 
 /**
-* Devuelve la cantidad de elementos de la lista 'l'.
+* @brief Devuelve la cantidad de elementos de la lista 'l'.
+* @param l Puntero a la lista de elementos.
+* @return Entero positivo mayor o igual a 0.
 */
 extern unsigned int lista_cantidad(lista_t *l);
 
 /**
-* Devuelve verdadero (distinto de 0) si la lista est· vacÌa, y falso (igual a 0) si la lista contiene al menos un elemento.
+* @brief Devuelve verdadero (distinto de 0) si la lista est√° vac√≠a, y falso (igual a 0) si la lista contiene al menos un elemento.
+* @param lista Lista de elementos.
+* @return TRUE si la lista est√° vacia, de lo contrario, FALSE.
 */
 extern int lista_vacia(lista_t lista);
 
-#endif // LISTAORDENADA_H_INCLUDED
+#endif //LISTAORDENADA_H_INCLUDED

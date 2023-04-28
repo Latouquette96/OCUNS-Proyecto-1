@@ -1,15 +1,18 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include "listaordenada.h"
-
-/*
-* Archivo implementación del TDA Lista.
+/**
+* @file listaordenada.c
+* @brief Implementación del TDA Lista.
 * El TDA LISTA almacenará elementos pares de la forma <cadena_de_caracteres, entero>.
 * La lista es una lista sin centinela con posición indirecta.
 * La lista a implementar es una lista ordenada.
 *
-* Comision N°XX (David Emanuel Latouquette - Otto)
+* @author Comisión N°17 (David Emanuel Latouquette - Otto Krause)
 */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "define.h"
+#include "listaordenada.h"
+
 
 typedef struct celda{
     elemento_t elem;
@@ -23,9 +26,6 @@ struct lista {
     int cantidad; ///Cantidad de elementos de la lista.
 };
 
-/**
-* Crea una lista vacía y la devuelve.
-*/
 lista_t *lista_crear(){
     //Reservación de memoria para una lista.
     lista_t *L = (struct lista*)malloc(sizeof(struct lista));
@@ -40,13 +40,6 @@ lista_t *lista_crear(){
     return L;
 }
 
-/**
-* Inserta el elemento 'elem' en la posición 'pos' de la lista (Asumo que la posicion 'pos' comienza desde 0).
-* Retorna:
-*   ERROR_LISTA_MEMORIA si no se reservó memoria.
-*   ERROR_LISTA_BUSQUEDA si se pasó una posicion fuera de rango.
-*   TRUE si se insertó el elemento correctamente.
-*/
 int lista_insertar(lista_t *l, elemento_t elem, unsigned int pos){
     ///Variables a emplear
     celda_t *celda_nueva;
@@ -98,9 +91,6 @@ int lista_insertar(lista_t *l, elemento_t elem, unsigned int pos){
     return valor_retornar;
 }
 
-/**
-* Elimina el elemento de la posición 'pos' de la lista.
-*/
 elemento_t *lista_eliminar(lista_t *l, unsigned int pos){
     elemento_t *elemento_eliminado = NULL;
 
@@ -141,9 +131,6 @@ elemento_t *lista_eliminar(lista_t *l, unsigned int pos){
     return elemento_eliminado;
 }
 
-/**
-* Devuelve un puntero al elemento que ocupa la posición 'pos' de la lista.
-*/
 elemento_t *lista_elemento(lista_t *l, unsigned int pos){
     elemento_t *elemento_a_retornar = NULL;
 
@@ -173,10 +160,6 @@ elemento_t *lista_elemento(lista_t *l, unsigned int pos){
     return elemento_a_retornar;
 }
 
-/**
-* Procedimiento auxiliar para ordenar la lista.
-* Realiza el ordenamiento de manera recursiva, ordenando los primeros n=pos_final elementos de acuerdo a la función comparación.
-*/
 elemento_t ordenar_auxiliar(celda_t *celda_actual, int pos_inicial, int pos_final, funcion_comparacion_t comparar){
     //Si se llegó al final
     if (pos_inicial==pos_final){
@@ -199,9 +182,6 @@ elemento_t ordenar_auxiliar(celda_t *celda_actual, int pos_inicial, int pos_fina
     }
 }
 
-/**
-* Dada la lista 'l' y la función 'comparar' ordena la lista de acuerdo al criterio de dicha función.
-*/
 int lista_ordenar(lista_t *l, funcion_comparacion_t comparar){
     int n = l->cantidad;
 
@@ -213,17 +193,11 @@ int lista_ordenar(lista_t *l, funcion_comparacion_t comparar){
     return TRUE;
 }
 
-/**
-* Devuelve la cantidad de elementos de la lista 'l'.
-*/
 unsigned int lista_cantidad(lista_t *l){
     unsigned int cant = (unsigned int) l->cantidad;
     return cant;
 }
 
-/**
-* Devuelve verdadero (distinto de 0) si la lista está vacía, y falso (igual a 0) si la lista contiene al menos un elemento.
-*/
 int lista_vacia(lista_t lista){
     int esta_vacia = (lista.cantidad == 0) ? TRUE : FALSE;
     return esta_vacia;

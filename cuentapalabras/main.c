@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "multiset.h"
+#include "listaordenada.h"
 
 int main(int argc, char *argv[]){
 
