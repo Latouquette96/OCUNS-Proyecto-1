@@ -29,7 +29,7 @@ typedef enum{
 
 /**
  * @struct elemento.
- * @brief Modela un elemento que tendrá como valor a la cantidad de repeticiones de una palabra 
+ * @brief Modela un elemento que tendrá como valor a la cantidad de repeticiones de una palabra
  * y el valor b será un puntero a la palabra en cuestión.
 */
 struct elemento {
@@ -46,8 +46,17 @@ typedef comparacion_resultado_t (funcion_comparacion_t)(
     elemento_t *elem1,
     elemento_t *elem2
 );
-typedef struct lista lista_t;
 
+
+typedef struct celda celda_t;
+
+
+struct lista {
+    celda_t *primera; ///Puntero a la primera celda de la lista.
+    int cantidad; ///Cantidad de elementos de la lista.
+};
+
+typedef struct lista lista_t;
 
 /**
 * @brief Crea una lista vacía y la devuelve.
@@ -69,10 +78,10 @@ extern lista_t *lista_crear();
 extern int lista_insertar(lista_t *l, elemento_t elem, unsigned int pos);
 
 /**
-* @brief Elimina el elemento de la posición 'pos' de la lista y lo retorna. 
+* @brief Elimina el elemento de la posición 'pos' de la lista y lo retorna.
 * @param l Puntero a la lista de elementos.
 * @param pos Entero positivo que indica la posicion a eliminar (0<pos<n, donde n es el tamaño de la lista).
-* @return El elemento removido de la lista en caso de que la posición pertenezca a la lista (esto es, para una lista de n elemntos, pos<n), 
+* @return El elemento removido de la lista en caso de que la posición pertenezca a la lista (esto es, para una lista de n elemntos, pos<n),
 de lo contrario, retorna NULL.
 */
 extern elemento_t *lista_eliminar(lista_t *l, unsigned int pos);
@@ -81,7 +90,7 @@ extern elemento_t *lista_eliminar(lista_t *l, unsigned int pos);
 * @brief Devuelve un puntero al elemento que ocupa la posición 'pos' de la lista.
 * @param l Puntero a la lista de elemntos.
 * @param pos Entero positivo que indica la posicion (0<pos<n, donde n es el tamaño de la lista).
-* @return El elemento de la posición 'pos' (esto es, para una lista de n elemntos, pos<n), 
+* @return El elemento de la posición 'pos' (esto es, para una lista de n elemntos, pos<n),
 de lo contrario, retorna NULL.
 */
 extern elemento_t *lista_elemento(lista_t *l, unsigned int pos);

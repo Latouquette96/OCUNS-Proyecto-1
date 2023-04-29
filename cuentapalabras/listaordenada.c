@@ -17,14 +17,9 @@
 typedef struct celda{
     elemento_t elem;
     struct celda *siguiente;
-} celda_t;
-
-typedef struct celda celda_t;
-
-struct lista {
-    celda_t *primera; ///Puntero a la primera celda de la lista.
-    int cantidad; ///Cantidad de elementos de la lista.
 };
+
+
 
 lista_t *lista_crear(){
     //Reservación de memoria para una lista.

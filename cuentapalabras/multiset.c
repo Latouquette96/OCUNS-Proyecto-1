@@ -6,13 +6,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "listaordenada.h"
 #include "multiset.h"
+#include "listaordenada.h"
 #include "define.h"
 
 /**
  * @struct trie
- * @brief Modela un árbol trie, donde el rótulo será la cantidad de repeticiones de la palabra hasta el nodo actual y 
+ * @brief Modela un árbol trie, donde el rótulo será la cantidad de repeticiones de la palabra hasta el nodo actual y
  * puede tener hasta 26 nodos hijos, donde cada hijo representa un caracter entre 'a' y 'z' (excluyendo a la ñ).
 */
 struct trie {

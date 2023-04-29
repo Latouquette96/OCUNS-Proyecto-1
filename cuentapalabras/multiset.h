@@ -54,7 +54,7 @@ extern int multiset_cantidad(multiset_t *m, char *s);
  * @return Lista de elementos ordenados con las palabras y su respectiva cantidad de repeticiones.
 */
 extern lista_t multiset_elementos(multiset_t *m, int (*f)(elemento_t, elemento_t));
-
+ 
 /**
  * @brief Elimina el multiset 'm' liberando el espacio de memoria reservado. Luego de la invocacion 'm' debe NULL.
  * @param m Puntero al multiset.
