@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "multiset.h"
-#include "listaordenada.h"
+#include "lista.h"
 #include "define.h"
 
 /**
@@ -25,7 +25,7 @@ struct trie {
  * @param ch Puntero al caracter.
  * @return Entero entre 0 y 25 si el char está entre 'a' y 'z' (excluyendo ñ). En caso contrario, devuelve -1.
 */
-int aux_recuperar_posicion_en_alfabeto(char*ch){
+static int aux_recuperar_posicion_en_alfabeto(char*ch){
     int value_ch = *ch;
     value_ch = ((value_ch>=97) && (value_ch<=122)) ? value_ch - 97 : -1;
 
@@ -37,7 +37,7 @@ int aux_recuperar_posicion_en_alfabeto(char*ch){
  * @param pos Entero entre 0 y 25.
  * @return Caracter entre 'a' y 'z' (excluyendo a ñ).
 */
-char aux_recuperar_caracter_en_posicion(int pos){
+static char aux_recuperar_caracter_en_posicion(int pos){
     char ch = (97 + pos);
     return ch;
 }
@@ -50,7 +50,7 @@ char aux_recuperar_caracter_en_posicion(int pos){
  * @param length_s Entero mayor o igual a 1 que representa la longitud de la cadena s.
  * @return Elemento construido y con memoria reservada.
 */
-elemento_t aux_construir_elemento(int cant_repeticiones, char* s, int length_s){
+static elemento_t aux_construir_elemento(int cant_repeticiones, char* s, int length_s){
     //Reservacián de memoria
     elemento_t *elem = (elemento_t*) malloc(sizeof(elemento_t));
     //Si no se reserva memoria, entonces el programa finaliza indicando el error en cuestián.
@@ -82,7 +82,7 @@ elemento_t aux_construir_elemento(int cant_repeticiones, char* s, int length_s){
  * @param s Arreglo de caracteres de la iteración previa.
  * @param length_s Longitud del arreglo previo.
 */
-void aux_cargar_elementos_en_lista(lista_t *L, struct trie *T, char s[], int length_s){
+static void aux_cargar_elementos_en_lista(lista_t *L, struct trie *T, char s[], int length_s){
     ///Inicializa las variables a utilizar.
     struct trie *T_hijo;
     char s_nuevo[length_s+1];
@@ -102,15 +102,14 @@ void aux_cargar_elementos_en_lista(lista_t *L, struct trie *T, char s[], int len
             s_nuevo[length_s] = aux_recuperar_caracter_en_posicion(i);
 
             //Si el nodo hijo tiene una cantidad>0, entonces es una palabra con repeticiones que se debe insertar en la lista.
-            if (T_hijo->cantidad>0){
+            if (T_hijo->cantidad > 0){
                 elemento_t elem = aux_construir_elemento(T_hijo->cantidad, s_nuevo, length_s+1);
                 lista_insertar(L, elem, 0);
             }
+
+            aux_cargar_elementos_en_lista(L, T_hijo, s_nuevo, length_s+1);
         }
     }
-
-
-
 }
 
 
@@ -129,7 +128,6 @@ multiset_t *multiset_crear(){
 
     return M;
 }
-
 
 void multiset_insertar(multiset_t *m, char *s){
     int pos_en_alfabeto = -1;
@@ -192,15 +190,59 @@ int multiset_cantidad(multiset_t *m, char s[]){
     return cant_repeticiones;
 }
 
-
 lista_t multiset_elementos(multiset_t *m, int (*f)(elemento_t, elemento_t)){
+    //Se crea la lista de elementos y se almacena su puntero.
     lista_t *L = (lista_t*) lista_crear();
+    //Parsing de multiset a trie para poder utilizarlo en la función a continuación.
     struct trie *T = (struct trie*) m;
+    //Elemento del nodo raiz es una cadena vacía.
     char s[1] = {'\0'};
-
+    //Se procede a cargar la lista de manera semi-recursiva.
     aux_cargar_elementos_en_lista(L, T, s, 0);
+    //Finalmente, se realiza el ordenamiento de la lista.
+    ///TODO: Verificar que sucede en lista_ordenar
+    //lista_ordenar(L, f);
 
     return *L;
 }
 
-void multiset_eliminar(multiset_t **m){}
+/**
+ * @brief Auxiliar: Realiza la liberación de la memoria, esto es, remueve todo dato perteneciente al nodo de la memoria.
+ * @param nodo Puntero a un nodo del árbol.
+*/
+static void aux_liberar_memoria(struct trie *nodo){
+    nodo->cantidad = 0;
+    free(nodo->siguiente);
+    free(nodo);
+    nodo = NULL;
+}
+
+/**
+ * @brief Auxiliar: Elimina los nodos del árbol de manera recursiva.
+ * @param nodo Puntero a un nodo del árbol.
+*/
+static void aux_multiset_eliminar(struct trie *nodo){
+    //Si el puntero al nodo del arbol no es nulo, entonces.
+    if (nodo!=NULL){
+        //Un nodo puede llegar a tener, como mucho, 26 hijos (por cada letra del alfabeto, excluyendo la ñ).
+        for (int i=0; i<26; i++){
+            //Si el nodo i no es nulo, se sigue con el recorrido.
+            if (nodo->siguiente[i]!=NULL){
+                //Sigo con el recorrido del árbol
+                aux_multiset_eliminar(nodo->siguiente[i]);
+
+                //Finalizado el recorrido, se procede a eliminar el nodo y su contenido.
+                aux_liberar_memoria(nodo->siguiente[i]);
+            }
+        }
+
+    }
+}
+
+void multiset_eliminar(multiset_t **m){
+    //Realiza la eliminación del multiset de manera recursiva, partiendo de la raiz del árbol trie.
+    aux_multiset_eliminar((struct trie*) m);
+    //Libera el espacio reservado para el multiset y setea la referencia como NULL
+    free(*m);
+    *m = NULL;
+}

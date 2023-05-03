@@ -8,7 +8,7 @@
 #ifndef MULTISET_H_INCLUDED
 #define MULTISET_H_INCLUDED
 
-#include "listaordenada.h"
+#include "lista.h"
 
 #define ERROR_MULTISET_MEMORIA -4
 #define ERROR_MULTISET_ELIMINAR -5

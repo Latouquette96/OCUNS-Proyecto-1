@@ -1,5 +1,5 @@
 /**
-* @file listaordenada.c
+* @file lista.c
 * @brief Implementación del TDA Lista.
 * El TDA LISTA almacenará elementos pares de la forma <cadena_de_caracteres, entero>.
 * La lista es una lista sin centinela con posición indirecta.
@@ -11,14 +11,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "define.h"
-#include "listaordenada.h"
+#include "lista.h"
 
-
+/**
+ * @struct celda
+ * @brief La celda permite almacenar un elemento 'elem' y una referencia a la siguiente celda.
+*/
 typedef struct celda{
     elemento_t elem;
     struct celda *siguiente;
 };
-
 
 
 lista_t *lista_crear(){

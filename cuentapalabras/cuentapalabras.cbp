@@ -36,10 +36,11 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="cuentapalabras.h" />
-		<Unit filename="listaordenada.c">
+		<Unit filename="define.h" />
+		<Unit filename="lista.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="listaordenada.h" />
+		<Unit filename="lista.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>

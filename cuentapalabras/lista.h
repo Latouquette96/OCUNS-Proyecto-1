@@ -1,5 +1,5 @@
 /**
-* @file listaordenada.h
+* @file lista.h
 * @brief Archivo encabezado del TDA Lista.
 * El TDA LISTA almacenará elementos pares de la forma <cadena_de_caracteres, entero>.
 * La lista es una lista sin centinela con posición indirecta.
@@ -7,8 +7,8 @@
 * @author Comisión N°17 (David Emanuel Latouquette - Otto Krause)
 */
 
-#ifndef LISTAORDENADA_H_INCLUDED
-#define LISTAORDENADA_H_INCLUDED
+#ifndef LISTA_H_INCLUDED
+#define LISTA_H_INCLUDED
 
 #include "define.h"
 
@@ -46,16 +46,16 @@ typedef comparacion_resultado_t (funcion_comparacion_t)(
     elemento_t *elem1,
     elemento_t *elem2
 );
-
-
 typedef struct celda celda_t;
 
-
+/**
+ * @struct lista
+ * @brief Modela una lista simplemente enlazada y sin nodo centinela.
+*/
 struct lista {
     celda_t *primera; ///Puntero a la primera celda de la lista.
     int cantidad; ///Cantidad de elementos de la lista.
 };
-
 typedef struct lista lista_t;
 
 /**
@@ -66,7 +66,7 @@ typedef struct lista lista_t;
 extern lista_t *lista_crear();
 
 /**
-* @brief Inserta el elemento 'elem' en la posición 'pos' de la lista (Asumo que la posicion 'pos' comienza desde 0).
+* @brief Inserta el elemento 'elem' en la posición 'pos' de la lista.
 * @param l Puntero a la lista de elementos.
 * @param elem Elemento a insertar en la lista.
 * @param pos Entero positivo que indica la posicion de inserción (0<pos<n, donde n es el tamaño de la lista).
@@ -117,4 +117,4 @@ extern unsigned int lista_cantidad(lista_t *l);
 */
 extern int lista_vacia(lista_t lista);
 
-#endif //LISTAORDENADA_H_INCLUDED
+#endif //LISTA_H_INCLUDED
