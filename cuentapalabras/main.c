@@ -1,22 +1,134 @@
+/**
+* @file main.c
+* @brief Encabezado del Main.
+* Modela la funci贸n que inicia la ejecuci贸n de todo el programa. Adem谩s, ac谩 es donde se capturan los argumentos de entrada al programa.
+* @author Comisi贸n N掳17 (David Emanuel Latouquette - Otto Krause)
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <dirent.h> //Utilizada para obtener los archivos de los directorios.
 #include "multiset.h"
-#include "listaordenada.h"
+#include "lista.h"
+
+//----FUNCIONES PARA LA COMPROBACI脫N DEL DRECTORIO Y ARCHIVOS------
+
+/**
+ * @brief Comprueba si un puntero a una cadena de caracteres es un el nombre de un archivo con extensi贸n .txt.
+ * @param name Puntero a cadena de caracteres.
+ * @return TRUE si es un archivo .txt y FALSE en caso contrario.
+*/
+static int tiene_extension_txt(char *name){
+    //Inicializaci贸n de variables.
+    int to_return = FALSE;
+    char * p_ch = name;
+    char * p_extension = NULL;
+
+    //Mientras no sea el caracter fin de cadena.
+    while((*p_ch)!='\0'){
+        /**
+         * Si el caracter es un punto, se lo almacena como posible inicio de extension de archivo.
+         * Esto se hace puesto que podr铆a existir archivos del nombre "archivo.1.txt" y el primer punto no ser铆a el inicio de la extensi贸n pero si el segundo.
+        */ 
+        if ((*p_ch)=='.'){
+            p_extension = p_ch;
+        }
+        //Apunta al pr贸ximo caracter.
+        p_ch++;
+    }
+
+    //Finalmente, si el puntero a la extensi贸n no es nulo, entonces se verifica si el nombre dado finaliza con .txt
+    if (p_extension!=NULL){
+        //Si la extensi贸n dada es igual a .txt, entonces es un archivo .txt.
+        if (strcmp(p_extension, ".txt")==0){
+            to_return = TRUE;
+        }
+    }
+
+    return to_return;
+}
+
+/**
+ * @brief Abre el directorio indicado en path y devuelve un puntero al manejador de archivos de dicho directorio.
+ * @param path Puntero a una cadena de caracteres que indica una ruta a un directorio.
+ * @return Puntero al manejador de archivos del directorio en caso de que la ruta sea v谩lida, en caso contrario, retorna NULL (y por lo tanto, la ruta dada ser谩 err贸nea).
+*/
+static DIR* abrir_directorio(char *path){
+    DIR *d = opendir(path);
+    return d;
+}
+
+/**
+ * @brief Analiza el directorio dado en 'path' en busca de archivos .txt y devuelve el resultado de la operaci贸n.
+ * @param parh Puntero a una cadena de caracteres.
+ * @return TRUE si el directorio es correcto y se analiz贸 correctamente, de lo contrario FALSE.
+*/
+static int analizar_directorio(DIR *d){
+    //Inicializa los punteros.
+    struct dirent *dir;
+    int to_return = TRUE;
+
+    //Si no devuelve nulo, entonces el directorio es correcto.
+    if (d!=NULL){
+        while((dir=readdir(d))!=NULL){
+
+            if (tiene_extension_txt(dir->d_name)==TRUE){
+                printf("%s\n", dir->d_name);
+            }
+        }
+        closedir(d);
+    }
+    else{
+        to_return = FALSE;
+    }
+
+    return to_return;
+}
+
+
+
+//----FUNCIONES PARA MOSTRAR MENSAJES INICIALES EN CONSOLA----- 
+
+/**
+ * @brief Muestra un mensaje con los par谩metros a emplear para invocar el programa correctamente.
+*/
+static void mostrar_mensaje_opciones(){
+    printf("Bienvenido al programa cuentapalabras. El programa admite los siguientes parametros opcionales:\n\n");
+    printf("[-h] [directorio de entrada]: Dado el directorio de archivos de texto, se procesa cada archivo contabilizando las palabras de cada uno de los archivos.\n");
+    printf("  -Genera un archivo 'cadauno.out' que contiene la cantidad de veces que aparece cada palabra en en cada uno de los archivos.\n");
+    printf("  -Genera un archivo 'totales.out' que contiene la cantidad de veces que aparece cada palabra entre todos los archivos.\n");
+}
+
+
 
 int main(int argc, char *argv[]){
 
-    //Por defecto, siempre se pasa un par醡etro que es el directorio en donde se ejecuta el programa.
+    //Por defecto, siempre se pasa un par谩metro que es el directorio en donde se ejecuta el programa.
     //Por lo tanto, argc es 1 o mayor a 1.
     if (argc==1){
-        printf("Bienvenido al programa cuentapalabras. El programa admite los siguientes parametros opcionales:\n\n");
-        printf("[-h] [directorio de entrada]: Dado el directorio de archivos de texto, se procesa cada archivo contabilizando las palabras de cada uno de los archivos.\n");
-        printf("  -Genera un archivo 'cadauno.out' que contiene la cantidad de veces que aparece cada palabra en en cada uno de los archivos.\n");
-        printf("  -Genera un archivo 'totales.out' que contiene la cantidad de veces que aparece cada palabra entre todos los archivos.\n");
+        mostrar_mensaje_opciones();
     }
     else{
-        //Si se ha definido alg鷑 par醡etro
+        //Si se ha definido alg煤n par谩metro
         printf("Cantidad de parametros: %i\n", argc);
         printf("%s", argv[1]);
+
+        //Si la comparacion devuelve 0, entonces se tiene que ambas cadenas son iguales.
+        if (strcmp(argv[1], "-h")==0){
+            //Abre el directorio y recupera el puntero al manejador de archivos.
+            DIR* dir = abrir_directorio(argv[2]);
+            //Si el puntero no es nulo, esto es, que el directorio era v谩lido.
+            if (dir!=NULL){
+                analizar_directorio(dir);
+                printf("Directorio abierto correctamente.");
+            }
+
+        }
+        else{
+            //Si la cadena es distinta a "-h", entonces mostrar mensaje con opciones.
+            mostrar_mensaje_opciones();
+        }
     }
 
     return 0;

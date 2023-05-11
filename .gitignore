@@ -5,3 +5,7 @@
 *.depend
 cuentapalabras/cuentapalabras.layout
 *.layout
+cuentapalabras/.vscode/c_cpp_properties.json
+*.layout
+cuentapalabras/.vscode/settings.json
+cuentapalabras/cuentapalabras.layout
