@@ -8,3 +8,5 @@ información en archivos de salida.
 * @author Comisión N°17 (David Emanuel Latouquette - Otto Krause)
 */
 
+#define CUENTAPALABRAS_ERROR_CONTADOR     -5
+#define CUENTAPALABRAS_ARCHIVOS_GENERADOS -6
