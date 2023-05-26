@@ -27,7 +27,18 @@ struct trie {
 */
 static int aux_recuperar_posicion_en_alfabeto(char*ch){
     int value_ch = *ch;
-    value_ch = ((value_ch>=97) && (value_ch<=122)) ? value_ch - 97 : -1;
+
+    if ((value_ch>=65) && (value_ch<=90)){
+        value_ch = value_ch - 65;
+    }
+    else{
+        if ((value_ch>=97) && (value_ch<=122)){
+            value_ch = value_ch - 97;
+        }
+        else{
+            value_ch = -1;
+        }
+    }
 
     return value_ch;
 }
@@ -143,10 +154,9 @@ void multiset_insertar(multiset_t *m, char *s){
             T = T->siguiente[pos_en_alfabeto];
             //Si no tiene memoria reservada, se la reserva.
             if (T==NULL){
-                T->siguiente[pos_en_alfabeto] = (struct trie*) multiset_crear();
+                T = (struct trie*) multiset_crear();
             }
         }
-
         //Siguiente char.
         s++;
     }
@@ -199,9 +209,6 @@ lista_t multiset_elementos(multiset_t *m, int (*f)(elemento_t, elemento_t)){
     char s[1] = {'\0'};
     //Se procede a cargar la lista de manera semi-recursiva.
     aux_cargar_elementos_en_lista(L, T, s, 0);
-    //Finalmente, se realiza el ordenamiento de la lista.
-    ///TODO: Verificar que sucede en lista_ordenar
-    //lista_ordenar(L, f);
 
     return *L;
 }
@@ -227,12 +234,15 @@ static void aux_multiset_eliminar(struct trie *nodo){
         //Un nodo puede llegar a tener, como mucho, 26 hijos (por cada letra del alfabeto, excluyendo la ñ).
         for (int i=0; i<26; i++){
             //Si el nodo i no es nulo, se sigue con el recorrido.
-            if (nodo->siguiente[i]!=NULL){
+            printf("%d", i);
+            if (nodo!=NULL){
+                if (nodo->siguiente[i]!=NULL){
                 //Sigo con el recorrido del árbol
                 aux_multiset_eliminar(nodo->siguiente[i]);
 
                 //Finalizado el recorrido, se procede a eliminar el nodo y su contenido.
                 aux_liberar_memoria(nodo->siguiente[i]);
+            }
             }
         }
 
@@ -241,8 +251,8 @@ static void aux_multiset_eliminar(struct trie *nodo){
 
 void multiset_eliminar(multiset_t **m){
     //Realiza la eliminación del multiset de manera recursiva, partiendo de la raiz del árbol trie.
-    aux_multiset_eliminar((struct trie*) m);
+    //aux_multiset_eliminar(*m);
     //Libera el espacio reservado para el multiset y setea la referencia como NULL
-    free(*m);
+    //free(*m);
     *m = NULL;
 }

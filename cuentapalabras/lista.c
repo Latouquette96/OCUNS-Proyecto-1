@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "define.h"
 #include "lista.h"
 
@@ -17,8 +18,8 @@
  * @struct celda
  * @brief La celda permite almacenar un elemento 'elem' y una referencia a la siguiente celda.
 */
-typedef struct celda{
-    elemento_t elem;
+struct celda{
+    elemento_t *elem;
     struct celda *siguiente;
 };
 
@@ -37,52 +38,73 @@ lista_t *lista_crear(){
     return L;
 }
 
-int lista_insertar(lista_t *l, elemento_t elem, unsigned int pos){
-    ///Variables a emplear
-    celda_t *celda_nueva;
-    celda_t *celda_actual;
-    celda_t *celda_siguiente;
-    unsigned int cant = l->cantidad;
-    int valor_retornar = FALSE;
-
-    ///Si posicion es mayor a la cantidad de productos actual, directamente se devuelve
-    if (pos>cant){
-        valor_retornar = ERROR_LISTA_BUSQUEDA;
+static celda_t * aux_construir_celda(elemento_t elem, celda_t * celda_siguiente){
+    ///Reservo memoria para la celda nueva.
+    celda_t * celda_nueva = (struct celda*) malloc(sizeof(struct celda));
+    ///Si no se ha reservado memoria para la nueva celda, salir del programa.
+    if (celda_nueva==NULL){
+        exit(ERROR_LISTA_MEMORIA);
     }
-    else{
-        ///Reservo el espacio en memoria para la nueva celda.
-        celda_nueva = (struct celda*) malloc(sizeof(struct celda));
-        //Si no se reservó memoria para la nueva celda, entonces se realiza una salida del sistema.
-        if (celda_nueva==NULL){
-            exit(ERROR_LISTA_MEMORIA);
-        }
-        //Se almacena el elemento en cuestión en la nueva celda.
-        celda_nueva->elem = elem;
+    ///Asignar los valores correspondientes.
+    celda_nueva->elem = &elem;
+    celda_nueva->siguiente = celda_siguiente;
 
-        ///Recupero la celda primera de la lista.
+    return celda_nueva;
+}
+
+
+int lista_insertar(lista_t *l, elemento_t elem, unsigned int pos){
+    int valor_retornar = TRUE;
+    int cantidad_elementos = l->cantidad;
+    celda_t * celda_nueva;
+    celda_t * celda_siguiente;
+    celda_t * celda_actual;
+
+    ///Si la posicion es menor o igual a la cantidad de elementos se puede insertar elemento.
+    if (pos<=(cantidad_elementos)){
         celda_actual = l->primera;
 
-        ///Busca la posicion en donde se debe insertar.
-        //Si la posicion es 0, entonces el elemento se inserta al principio de la lista.
+        ///Si hay elementos y se inserta al principio de la lista.
         if (pos==0){
-            l->primera = celda_nueva;
-        }
-        else{
-            //Busca la posicion en cuestion (empleando posicion indirecta)
-            for(int posicion_actual=1; posicion_actual<=pos-1; posicion_actual++){
-                celda_actual = celda_actual->siguiente;
+            //Caso 1: Cantidad y pos en 0.
+            if (cantidad_elementos==0){
+                celda_nueva = aux_construir_celda(elem, NULL);
+                l->primera = celda_nueva;
+                printf("Primer caso. Elemento (%d, %s)\n", celda_nueva->elem->a, celda_nueva->elem->b);
+            }
+            else{
+                //Caso 2: pos==0 y cantidad>0
+                celda_nueva = aux_construir_celda(elem, celda_actual);
+                l->primera = celda_nueva;
+                printf("Segundo caso. Elemento (%d, %s)\n", celda_nueva->elem->a, celda_nueva->elem->b);
             }
         }
+        else{
+            //Caso 3: Si la posicion es la cantidad de elementos, es inserción al final de la lista.
+            if (pos==cantidad_elementos){
+                while(celda_actual!=NULL){
+                    celda_actual = celda_actual->siguiente;
+                }
+                celda_nueva = aux_construir_celda(elem, NULL);
+                celda_actual = celda_nueva;
+                printf("Tercer caso. Elemento (%d, %s)\n", celda_nueva->elem->a, celda_nueva->elem->b);
+            }
+            else{
+                //Caso 4: Si la posicion está es 0<pos<cantidad
+                for (int i=1; i<pos; i++){
+                    celda_actual = celda_actual->siguiente;
+                }
+                celda_siguiente = celda_actual->siguiente;
+                celda_nueva = aux_construir_celda(elem, celda_siguiente);
+                celda_actual->siguiente = celda_nueva;
+                printf("Cuarto caso. Elemento (%d, %s)\n", celda_nueva->elem->a, celda_nueva->elem->b);
+            }
+        }
+        l->cantidad = cantidad_elementos+1;
+    }
 
-        ///Actualizar las referencias de manera consistente.
-        //La celda_siguiente será la siguiente celda apuntada por celda_actual, la cual será la siguiente celda de celda_nueva.
-        celda_siguiente = celda_actual->siguiente;
-        celda_nueva->siguiente = celda_siguiente;
-        celda_actual->siguiente = celda_nueva;
-
-        ///Finalmente se incrementa la cantidad de elementos y se actualiza el valor a retornar.
-        l->cantidad = cant+1;
-        valor_retornar = TRUE;
+    else{
+        valor_retornar = ERROR_LISTA_BUSQUEDA;
     }
 
     return valor_retornar;
@@ -90,40 +112,43 @@ int lista_insertar(lista_t *l, elemento_t elem, unsigned int pos){
 
 elemento_t *lista_eliminar(lista_t *l, unsigned int pos){
     elemento_t *elemento_eliminado = NULL;
-
     ///Buscar solo si la posicion no excede el tamaño de la lista.
-    if (pos<(l->cantidad)){
-        //Recupera la primera posicion para recorrer
-        celda_t *celda_actual = l->primera;
-        celda_t *celda_eliminar;
+    if (pos<l->cantidad && l->cantidad>0){
+        celda_t * celda_eliminar = l->primera;
+        celda_t * celda_siguiente;
+        celda_t * celda_anterior;
 
-        //Si es la primera posicion de la lista, entonces la celda a remover es la del inicio de la lista.
         if (pos==0){
-            //Actualiza la celda a eliminar.
-            celda_eliminar = celda_actual;
-            //Actualiza como primer celda a la siguiente de celda_actual.
-            l->primera = celda_actual->siguiente;
+            l->primera = NULL;
+            l->primera = celda_eliminar->siguiente;
         }
         else{
-            //Busca la posicion en cuestion (empleando posicion indirecta)
-            for(int posicion_actual=1; posicion_actual<=pos-1; posicion_actual++){
-                celda_actual = celda_actual->siguiente;
+            for (int i=1; i<pos; i++){
+                celda_eliminar = celda_eliminar->siguiente;
             }
-            //Actualiza la celda a eliminar.
-            celda_eliminar = celda_actual->siguiente;
-            //Actualiza como siguiente de la celda_actual al siguiente de la celda_eliminar.
-            celda_actual->siguiente = celda_eliminar->siguiente;
+
+            ///Almacena la celda anterior a la que se debe eliminar (posicion indirecta).
+            celda_anterior = celda_eliminar;
+            celda_siguiente = (celda_eliminar->siguiente)->siguiente;
+            celda_eliminar = celda_eliminar->siguiente;
         }
 
-        ///Recupera el elemento a retornar.
-        (*elemento_eliminado) = celda_eliminar->elem;
-        ///Elimina la celda en cuestion, liberando el espacio ocupado por dicha celda.
+        ///Remueve toda referencia de la celda a eliminar.
+        elemento_eliminado = celda_eliminar->elem;
         celda_eliminar->siguiente = NULL;
-        free(celda_eliminar);
+        celda_eliminar->elem = NULL;
 
-        ///Disminuye la cantidad de elementos en la lista en 1.
+        ///Asigno las nuevas referencias a la celda anterior y siguiente.
+        celda_anterior->siguiente = celda_siguiente;
+
+        ///Disminuye en 1 el contador de elementos de la lista.
         l->cantidad = l->cantidad - 1;
+
+        ///Finalmente se libera la memoria reservada para la celda.
+        free(celda_eliminar);
     }
+
+    printf("lista_eliminar::elemento=%d\n", elemento_eliminado->a);
 
     return elemento_eliminado;
 }
@@ -143,7 +168,7 @@ elemento_t *lista_elemento(lista_t *l, unsigned int pos){
         }
         else{
             //Busca la posicion en cuestion (empleando posicion indirecta)
-            for(int posicion_actual=1; posicion_actual<=pos-1; posicion_actual++){
+            for(int posicion_actual=1; posicion_actual<pos; posicion_actual++){
                 celda_actual = celda_actual->siguiente;
             }
             //Almacena la celda del elemento.
@@ -151,23 +176,23 @@ elemento_t *lista_elemento(lista_t *l, unsigned int pos){
         }
 
         ///Recupera el elemento a retornar.
-        (*elemento_a_retornar) = celda_elemento->elem;
+        elemento_a_retornar = celda_elemento->elem;
     }
 
     return elemento_a_retornar;
 }
 
-elemento_t ordenar_auxiliar(celda_t *celda_actual, int pos_inicial, int pos_final, funcion_comparacion_t comparar){
+elemento_t *ordenar_auxiliar(celda_t *celda_actual, int pos_inicial, int pos_final, funcion_comparacion_t comparar){
     //Si se llegó al final
     if (pos_inicial==pos_final){
         return celda_actual->elem;
     }
     else{
         celda_t *celda_sgte = celda_actual->siguiente;
-        elemento_t elem_actual = celda_actual->elem;
-        elemento_t elem_ordenar = ordenar_auxiliar(celda_actual->siguiente, pos_inicial+1, pos_final, comparar);
+        elemento_t * elem_actual = celda_actual->elem;
+        elemento_t * elem_ordenar = ordenar_auxiliar(celda_actual->siguiente, pos_inicial+1, pos_final, comparar);
 
-        if (comparar(&elem_actual, &elem_ordenar)==ELEM1_MAYOR_QUE_ELEM2){
+        if (comparar(elem_actual, elem_ordenar)==ELEM1_MAYOR_QUE_ELEM2){
             celda_sgte->elem = elem_actual;
             celda_actual->elem = elem_ordenar;
         }

@@ -7,10 +7,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "cuentapalabras.c"
+#include "lista.h"
+#include "cuentapalabras.h"
+#include <dirent.h> //Utilizada para obtener los archivos de los directorios.
 
 
-//----FUNCIONES PARA MOSTRAR MENSAJES INICIALES EN CONSOLA----- 
+//----FUNCIONES PARA MOSTRAR MENSAJES INICIALES EN CONSOLA-----
 
 /**
  * @brief Imprime un mensaje con los parámetros a emplear para invocar el programa correctamente.
@@ -33,6 +35,38 @@ static void mostrar_mesnsaje_ruta_invalida(){
 //----MAIN----
 
 int main(int argc, char *argv[]){
+    printf("Prueba de lista\n");
+    lista_t * L = lista_crear();
+    printf("Insertando numeros del 1 al 10 en la posicion 0\n\n");
+
+    elemento_t ** elem = (elemento_t**) malloc(10*sizeof(struct elemento*));
+    for (int i=0; i<10; i++){
+        elem[i] = (elemento_t*) malloc(sizeof(struct elemento));
+        int * value = (int*) malloc(sizeof(int));
+        *value = i*i;
+        elem[i]->a = *value;
+        elem[i]->b = (char*) malloc(11*sizeof(char));
+        strcpy(elem[i]->b, "Hola");
+    }
+
+    for (int i=0; i<10; i++){
+        int resultado = (i==0) ? lista_insertar(L, *(elem[i]), i) : lista_insertar(L, *(elem[i]), i);
+    }
+
+    for (int i=0; i<10; i++){
+        elemento_t * elem = lista_elemento(L, i);
+        printf("pos=%d, a: %d, b:%s\n", i, elem->a, elem->b);
+    }
+
+    for (int i=0; i<10; i++){
+        elemento_t * elem = lista_eliminar(L, 0);
+        printf("Eliminado: %d %s\n", elem->a, elem->b);
+    }
+}
+
+
+
+int main2(int argc, char *argv[]){
 
     //Por defecto, siempre se pasa un parámetro que es el directorio en donde se ejecuta el programa.
     //Por lo tanto, argc es 1 o mayor a 1.
@@ -53,22 +87,28 @@ int main(int argc, char *argv[]){
                 //Reservo memoria para el contador de filas (nombres) del directorio.
                 int * p_cant_filas = malloc(sizeof(int));
                 //Si no se reservó memoria, entonces terminar ejecución.
-                if (p_cant_filas==NULL){ 
+                if (p_cant_filas==NULL){
                     exit(CUENTAPALABRAS_ERROR_CONTADOR);
                 }
                 //Inicializo en cero el contenido de lo apuntado por el puntero cant_filas.
                 (*p_cant_filas) = 0;
 
                 //Recupero todos los nombres de archivos de texto.
-                char** nombre_archivo = cuentapalabras_recopilar_nombres_archivos_txt(dir, 0, p_cant_filas);
+                char** nombre_archivo = cuentapalabras_recopilar_nombres_archivos_txt(dir, p_cant_filas);
+
                 //Ya no se necesita del DIR, por lo tanto, se cierra.
                 closedir(dir);
 
-                ///TODO: IMPLEMENTAR LA LOGICA REQUERIDA. 
+                int cant_filas = *p_cant_filas;
 
+                //Realizar la construcción de los archivos de salida.
+                cuentapalabras_construir_archivos_salida(argv[2], nombre_archivo, cant_filas);
 
-                //Libera la memoria utilizada por nombre_archivo.
-                cuentapalabras_liberar_memoria_nombres_archivos(dir, *p_cant_filas);
+                printf("Pasa construir\n\n");
+
+                //Libera la memoria utilizada por nombre_archivo y su respectivo contador.
+                //cuentapalabras_liberar_memoria_nombres_archivos(nombre_archivo, cant_filas);
+                free(p_cant_filas);
             }
             else{
                 //Puesto que no existe o no se abrió el directorio, entonces se tiene que es una ruta inválida.
