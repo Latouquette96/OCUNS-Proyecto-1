@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "lista.h"
-#include "cuentapalabras.h"
 #include <dirent.h> //Utilizada para obtener los archivos de los directorios.
 
 
@@ -34,38 +33,95 @@ static void mostrar_mesnsaje_ruta_invalida(){
 
 //----MAIN----
 
-int main(int argc, char *argv[]){
+
+static int funcion_comparacion(elemento_t elem1, elemento_t elem2){
+    int to_return;
+    int valor_elem_1 = elem1.a;
+    int valor_elem_2 = elem2.a;
+
+    //Si la cantidad de repeticiones de ELEM1 es mayor a ELEM2
+    if (valor_elem_1>valor_elem_2){
+        to_return = ELEM1_MAYOR_QUE_ELEM2;
+    }
+    else{
+        //Si la cantidad de repeticiones de ELEM1 es menor a ELEM2
+        if (valor_elem_1<valor_elem_2){
+            to_return = ELEM1_MENOR_QUE_ELEM2;
+        }
+        else{
+            //En caso de igualdad, comparar por las cadenas.
+            //Si el texto de ELEM1 es mayor a ELEM2
+            if (strcmp(elem1.b, elem2.b)>0){
+                to_return = ELEM1_MAYOR_QUE_ELEM2;
+            }
+            else{
+                //Si el texto de ELEM1 es menor a ELEM2
+                if (strcmp(elem1.b, elem2.b)==0){
+                    to_return = ELEM1_IGUAL_QUE_ELEM2;
+                }
+                else{
+                    //Si ambos textos son iguales.
+                    to_return = ELEM1_MENOR_QUE_ELEM2;
+                }
+            }
+        }
+    }
+
+    return to_return;
+}
+
+
+int main(){
     printf("Prueba de lista\n");
     lista_t * L = lista_crear();
     printf("Insertando numeros del 1 al 10 en la posicion 0\n\n");
 
-    elemento_t ** elem = (elemento_t**) malloc(10*sizeof(struct elemento*));
-    for (int i=0; i<10; i++){
+    elemento_t ** elem = (elemento_t**) malloc(4*sizeof(struct elemento*));
+    for (int i=0; i<4; i++){
         elem[i] = (elemento_t*) malloc(sizeof(struct elemento));
         int * value = (int*) malloc(sizeof(int));
-        *value = i*i;
+        *value = -1*i*i;
         elem[i]->a = *value;
         elem[i]->b = (char*) malloc(11*sizeof(char));
         strcpy(elem[i]->b, "Hola");
+        printf("pos=%d, a=%d, b: %s\n", i, elem[i]->a, elem[i]->b);
     }
 
-    for (int i=0; i<10; i++){
-        int resultado = (i==0) ? lista_insertar(L, *(elem[i]), i) : lista_insertar(L, *(elem[i]), i);
+    for (int i=0; i<4; i++){
+        int resultado = lista_insertar(L, *(elem[i]), i);
     }
 
-    for (int i=0; i<10; i++){
-        elemento_t * elem = lista_elemento(L, i);
-        printf("pos=%d, a: %d, b:%s\n", i, elem->a, elem->b);
+    for (int i=0; i<4; i++){
+        free(elem[i]->b);
+        free(elem[i]);
+    }
+    free(elem);
+
+    elemento_t * elem0 = lista_elemento(L, 0);
+    printf("ELEMENTO:: pos=0, a=%d, b: %s\n", elem0->a, elem0->b);
+    elemento_t * elem1 = lista_elemento(L, 1);
+    printf("ELEMENTO:: pos=1, a=%d, b: %s\n", elem1->a, elem1->b);
+    elemento_t * elem2 = lista_elemento(L, 2);
+    printf("ELEMENTO:: pos=2, a=%d, b: %s\n", elem2->a, elem2->b);
+    elemento_t * elem3 = lista_elemento(L, 3);
+    printf("ELEMENTO:: pos=3, a=%d, b: %s\n", elem3->a, elem3->b);
+
+
+    lista_ordenar(L, funcion_comparacion);
+
+
+    for (int i=0; i<4; i++){
+        elemento_t * elem_remove = lista_eliminar(L, 0);
+        printf("Remove:: pos=i, a=%d, b: %s\n", elem_remove->a, elem_remove->b);
     }
 
-    for (int i=0; i<10; i++){
-        elemento_t * elem = lista_eliminar(L, 0);
-        printf("Eliminado: %d %s\n", elem->a, elem->b);
-    }
+    printf("Longitud lista: %d\n", L->cantidad);
+
+
+    return 0;
 }
 
-
-
+/*
 int main2(int argc, char *argv[]){
 
     //Por defecto, siempre se pasa un parámetro que es el directorio en donde se ejecuta el programa.
@@ -123,3 +179,4 @@ int main2(int argc, char *argv[]){
 
     return 0;
 }
+*/
