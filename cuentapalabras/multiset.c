@@ -149,13 +149,13 @@ void multiset_insertar(multiset_t *m, char *s){
         //Se recupera la posicion del char en cuestián.
         pos_en_alfabeto = aux_recuperar_posicion_en_alfabeto(s);
         //Si es un char válido, esto es, la posicion está entre 0 y 25 inclusive.
-        if (pos_en_alfabeto>=0){
+        if (pos_en_alfabeto!=-1){
+            //Si el nodo siguiente en la posicion dada no existe, entonces se crea.
+            if (T->siguiente[pos_en_alfabeto]==NULL){
+                T->siguiente[pos_en_alfabeto] = (struct trie*) multiset_crear();
+            }
             //Recupero el nodo trie en cuestián
             T = T->siguiente[pos_en_alfabeto];
-            //Si no tiene memoria reservada, se la reserva.
-            if (T==NULL){
-                T = (struct trie*) multiset_crear();
-            }
         }
         //Siguiente char.
         s++;
@@ -210,6 +210,8 @@ lista_t multiset_elementos(multiset_t *m, int (*f)(elemento_t, elemento_t)){
     //Se procede a cargar la lista de manera semi-recursiva.
     aux_cargar_elementos_en_lista(L, T, s, 0);
 
+    lista_ordenar(L, *f);
+
     return *L;
 }
 
@@ -234,7 +236,6 @@ static void aux_multiset_eliminar(struct trie *nodo){
         //Un nodo puede llegar a tener, como mucho, 26 hijos (por cada letra del alfabeto, excluyendo la ñ).
         for (int i=0; i<26; i++){
             //Si el nodo i no es nulo, se sigue con el recorrido.
-            printf("%d", i);
             if (nodo!=NULL){
                 if (nodo->siguiente[i]!=NULL){
                 //Sigo con el recorrido del árbol

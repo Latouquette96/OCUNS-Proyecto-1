@@ -160,6 +160,11 @@ static int aux_es_palabra_sin_caracteres_especiales(char* ch){
  * @return Multiset con las palabras contadas pertenecientes al archivo dado.
 */
 static multiset_t* aux_cargar_multiset(char*path, multiset_t *m_total){
+    /*
+    * Se hace uso de la función strtok para dividir las lineas de acuerdo a un arreglo de delimitadores (separadores).
+    * Fuente: https://parzibyte.me/blog/2018/11/13/separar-cadena-delimitadores-c-strtok/
+    */
+
     //Crea el multiset a retornar con las palabras contabilizadas del archivo dado.
     multiset_t *m_return = multiset_crear();
     //Abro el archivo en modo de lectura.
@@ -184,15 +189,10 @@ static multiset_t* aux_cargar_multiset(char*path, multiset_t *m_total){
         token_palabra = strtok(pt_linea, filtro);
         //Mientras el token no sea nulo
         while(token_palabra!=NULL){
-            printf("%s: ", token_palabra);
             //Si la cadena es valida, entonces se carga el token al mapeo
             if (aux_es_palabra_sin_caracteres_especiales(token_palabra)==TRUE){
                 multiset_insertar(m_return, token_palabra);
                 multiset_insertar(m_total, token_palabra);
-                printf("SI\n");
-            }
-            else{
-                printf("NO\n");
             }
             //Recupera el siguiente token
             token_palabra = NULL;
@@ -230,16 +230,13 @@ static void aux_exportar_multiset_a_archivo(FILE *file, char* nombre_archivo, mu
         //Para cada elemento del multiset, se lo escribe en el formato "cant_repeticion palabra".
         for (int i=0; i<size_lista; i++){
             elemento_t * elem_i = lista_elemento(&L, i);
-            fprintf(file, "%d\t%s\n", elem_i->a, elem_i->b);
+            fprintf(file, "%d\t%s", elem_i->a, elem_i->b);
         }
 
         //Elimino todos los elementos de la lista L.
         for (int i=0; i<size_lista; i++){
             lista_eliminar(&L, 0);
         }
-    }
-    else{
-        printf("Lista vacia\n");
     }
 }
 
@@ -267,7 +264,6 @@ void cuentapalabras_construir_archivos_salida(char* directorio, char** nombre_ar
 
     //Para cada archivo_i.
     for (int i=0; i<cant_filas; i++){
-        printf("nombre: %s\n", nombre_archivo[i]);
         //Creo el path para la ruta del archivo.
         char path[260];
         strcpy(path, directorio);
