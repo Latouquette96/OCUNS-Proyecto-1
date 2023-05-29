@@ -13,12 +13,18 @@
 
 //----FUNCIONES PARA MOSTRAR MENSAJES INICIALES EN CONSOLA-----
 
+/**
+* Imprime un mensaje de bienvenida al programa.
+*/
 static void mostrar_mensaje_bienvenida(){
-    printf("Proyecto: Programacion en C - Cuentapalabras\n");
-    printf("Autores: Comision #17 (David Emanuel Latouquette - Otto Krause)\n\n");
+    printf("+-----------------------------------------------------------------+\n");
+    printf("|          Proyecto: Programacion en C - Cuentapalabras           |\n");
+    printf("| Autores: Comision #17 (David Emanuel Latouquette - Otto Krause) |\n");
+    printf("+-----------------------------------------------------------------+\n\n");
+    printf("FUNCIONAMIENTO:\n");
     printf("El presente proyecto recibe un directorio, lee los archivos de texto y contabiliza las palabras en dos archivos:\n");
-    printf("  -Archivo cadauno.out: Contabiliza las palabras de cada archivo de manera ascendente por el numero de palabras.\n");
-    printf("  -Archivo totales.out: Contabiliza TODAS las palabras entre todos los archivos de texto y se ascendente por el numero de palabras.\n\n");
+    printf("  -'cadauno.out' que contiene la cantidad de veces que aparece cada palabra en en cada uno de los archivos.\n");
+    printf("  -'totales.out' que contiene la cantidad de veces que aparece cada palabra entre todos los archivos.\n");
 }
 
 /**
@@ -38,7 +44,14 @@ static void mostrar_mesnsaje_ruta_invalida(){
     printf("Ruta inválida. Ejecute el programa nuevamente con un directorio válido.\n");
 }
 
+/**
+* @brief Imprime un mensaje mostrando los nombres de los archivos de texto a analizar en el directorio dado.
+* @param directorio Puntero a cadena de caracteres que representa el directorio.
+* @param nombre Puntero de punteros de cadenas de caracteres que contiene los nombres de los archivos a analizar.
+* @param cant_nombres Entero que representa la cantidad de archivos a analizar.
+*/
 static void mostrar_mensaje_archivos_a_analizar(char* directorio, char ** nombre, int cant_nombres){
+    printf("ANALISIS DE ARCHIVOS\n");
     printf("Directorio '%s' analizado. Se encontraron los siguientes archivos de texto:\n", directorio);
     for (int i=0; i<cant_nombres; i++){
         printf("  -%s\n", nombre[i]);
@@ -81,10 +94,11 @@ int main(int argc, char *argv[]){
                 //Realizar la construcción de los archivos de salida.
                 cuentapalabras_construir_archivos_salida(argv[2], nombre_archivo, cant_filas);
                 //Libera la memoria utilizada por nombre_archivo y su respectivo contador.
-                //cuentapalabras_liberar_memoria_nombres_archivos(nombre_archivo, cant_filas);
+                cuentapalabras_liberar_memoria_nombres_archivos(nombre_archivo, cant_filas);
                 free(p_cant_filas);
 
-                printf("\nArchivos 'cadauno.out' y 'totales.out' creados con exito en el directorio '%s'\n", argv[2]);
+                printf("\nARCHIVOS GENERADOS\n");
+                printf("Archivos 'cadauno.out' y 'totales.out' creados con exito en el directorio '%s'.\n", argv[2]);
             }
             else{
                 //Puesto que no existe o no se abrió el directorio, entonces se tiene que es una ruta inválida.

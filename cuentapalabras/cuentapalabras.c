@@ -16,6 +16,8 @@ información en archivos de salida.
 #include "lista.h"
 #include "cuentapalabras.h"
 
+//---FUNCIONES PRINCIPALES-----
+
 /**
  * @brief Función de comparación de dos elementos.
  * @param elem1 Puntero a un elemento_t.
@@ -56,6 +58,13 @@ int funcion_comparacion(elemento_t elem1, elemento_t elem2){
     }
 
     return to_return;
+}
+
+static void aux_liberar_memoria_elemento(elemento_t * elem){
+    elem->a = 0;
+    free(elem->b);
+    free(elem);
+    elem = NULL;
 }
 
 
@@ -122,7 +131,7 @@ char** cuentapalabras_recopilar_nombres_archivos_txt(DIR *d, int*cant_filas){
 
 void cuentapalabras_liberar_memoria_nombres_archivos(char** C, int cant_filas){
     //Libera el espacio para cada una de las filas de caracteres.
-    for (int i=cant_filas-1; i>=0; i++){
+    for (int i=0; i<cant_filas; i++){
         free(C[i]);
     }
 
@@ -235,7 +244,8 @@ static void aux_exportar_multiset_a_archivo(FILE *file, char* nombre_archivo, mu
 
         //Elimino todos los elementos de la lista L.
         for (int i=0; i<size_lista; i++){
-            lista_eliminar(&L, 0);
+            elemento_t * elem = lista_eliminar(&L, 0);
+            aux_liberar_memoria_elemento(elem);
         }
     }
 }

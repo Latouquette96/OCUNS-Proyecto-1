@@ -252,8 +252,8 @@ static void aux_multiset_eliminar(struct trie *nodo){
 
 void multiset_eliminar(multiset_t **m){
     //Realiza la eliminación del multiset de manera recursiva, partiendo de la raiz del árbol trie.
-    //aux_multiset_eliminar(*m);
+    aux_multiset_eliminar(*m);
     //Libera el espacio reservado para el multiset y setea la referencia como NULL
-    //free(*m);
+    free(*m);
     *m = NULL;
 }
