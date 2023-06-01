@@ -223,18 +223,51 @@ static int aux_es_palabra_sin_caracteres_especiales(char* ch){
     if ((*ch)!='\0'){
         //Mientras el caracter recuperado no sea el fin de cadena y se mantenga la condicion de que es palabra.
         while(*ch!='\0' && to_return==TRUE){
-        //Si es un caracter alfabetico en MAYUSCULAS o minusculas.
-        if ((*ch)>=97 && (*ch)<=122){
-            //Apuntar al siguiente char.
-            ch++;
-        }
-        else{
-            to_return = FALSE;
+            //Si es un caracter alfabetico en MAYUSCULAS o minusculas.
+            if ((*ch)>=97 && (*ch)<=122){
+                //Apuntar al siguiente char.
+                ch++;
+            }
+            else{
+                to_return = FALSE;
+            }
         }
     }
+    else{
+        to_return = FALSE;
     }
 
     return to_return;
+}
+
+/**
+* @brief Recorre recursivamente la próxima cadena a recuperar por del archivo y la devuelve.
+* @param f Puntero a archivo.
+* @param longitud_cadena Longitud de la cadena a leer.
+* @return Puntero a cadena creada o NULL si la cadena en cuestión en un caracter separador de palabras.
+*/
+static char * aux_recuperar_cadena(FILE *f, int longitud_cadena){
+    char ch_actual = fgetc(f);
+
+    if ((feof(f)) || (ch_actual==' ') || (ch_actual=='\n') || (ch_actual=='.') || (ch_actual==':') || (ch_actual==';') || (ch_actual==',') || (ch_actual=='\0')){
+        //CB: Si la longitud es 0, entonces no hay cadena que crear.
+        if (longitud_cadena==0){
+            return NULL;
+        }
+        else{
+            //CB: Si la longitud es mayor a 1, entonces hay una palabra de por lo menos un char.
+            char * cadena = (char*) malloc((longitud_cadena+1)*sizeof(char));
+            cadena[longitud_cadena] = '\0';
+
+            return cadena;
+        }
+    }
+    else{
+        char * cadena = aux_recuperar_cadena(f, longitud_cadena+1);
+        cadena[longitud_cadena] = ch_actual;
+
+        return cadena;
+    }
 }
 
 /**
@@ -244,53 +277,26 @@ static int aux_es_palabra_sin_caracteres_especiales(char* ch){
  * @return Multiset con las palabras contadas pertenecientes al archivo dado.
 */
 static multiset_t* aux_cargar_multiset(char*path, multiset_t *m_total){
-    /*
-    * Se hace uso de la función strtok para dividir las lineas de acuerdo a un arreglo de delimitadores (separadores).
-    * Fuente: https://parzibyte.me/blog/2018/11/13/separar-cadena-delimitadores-c-strtok/
-    */
-
     //Crea el multiset a retornar con las palabras contabilizadas del archivo dado.
     multiset_t *m_return = multiset_crear();
     //Abro el archivo en modo de lectura.
     FILE* f = fopen(path, "r");
     //Si no se abre el archivo, entonces ha ocurrido un error.
     if (f==NULL){
+        printf("Error -7: Error en apertura de archivo");
         exit(CUENTAPALABRAS_ERROR_APERTURA_ARCHIVO);
     }
 
-    char linea_actual[MAXCHAR];
-    char filtro[] = {' ', '\n', '\t', '.', ':', ';', ',', '\0'};
-
     //Mientras que haya algo que leer en el archivo.
     while (!feof(f)) {
-        //Limpia el arreglo en cada instancia para no cargar basura.
-        memset(linea_actual, 0, MAXCHAR);
-        //Almacema todos los caracteres hasta el salto de línea o hasta el fin del archivo.
-        fgets(linea_actual, MAXCHAR, f);
-        for (int i=0; i<MAXCHAR; i++){
-            printf("%c", linea_actual[i]);
+        char * cadena = aux_recuperar_cadena(f, 0);
+
+        if ((cadena!=NULL) && (aux_es_palabra_sin_caracteres_especiales(cadena)==TRUE)){
+            multiset_insertar(m_return, cadena);
+            multiset_insertar(m_total, cadena);
         }
-        printf("\n\n");
-        //Punteros de inicio de archivo y de siguiente línea.
-        char * pt_linea = linea_actual;
-        //Tokeniza la línea de caracteres y devuelve un puntero a un arreglo de palabras.
-        char * token_palabra = NULL;
-        //Primer token (primera palabra)
-        token_palabra = strtok(pt_linea, filtro);
-        //Mientras el token no sea nulo
-        while(token_palabra!=NULL){
-            //Si la cadena es valida, entonces se carga el token al mapeo
-            if (aux_es_palabra_sin_caracteres_especiales(token_palabra)==TRUE){
-                multiset_insertar(m_return, token_palabra);
-                multiset_insertar(m_total, token_palabra);
-            }
-            //Recupera el siguiente token
-            token_palabra = NULL;
-            token_palabra = strtok(NULL, filtro);
-        }
-        //Fin de línea.
-        token_palabra = NULL;
-        *linea_actual = 0;
+
+        free(cadena);
     }
 
     //Cierro el archivo
@@ -307,7 +313,7 @@ static multiset_t* aux_cargar_multiset(char*path, multiset_t *m_total){
 */
 static void aux_exportar_multiset_a_archivo(FILE *file, char* nombre_archivo, multiset_t* multiset_archivo){
     //Si la cadena recibida es distinta de una cadena vacía.
-    if (*nombre_archivo!='\n'){
+    if (nombre_archivo!=NULL){
         fprintf(file, "%s\n", nombre_archivo);
     }
 
@@ -315,22 +321,25 @@ static void aux_exportar_multiset_a_archivo(FILE *file, char* nombre_archivo, mu
     lista_t L = multiset_elementos(multiset_archivo, NULL);
     lista_ordenar(&L, funcion_comparacion);
 
+    for (int i=0; i<lista_cantidad(&L); i++){
+        elemento_t * elem = lista_elemento(&L, i);
+        printf("%d   %s\n", elem->a, elem->b);
+    }
+
     //Si la lista no está vacia, entonces se procede a recorrerla para obtener los elementos.
     if (lista_vacia(L)==FALSE){
         int size_lista = lista_cantidad(&L);
 
-        //Para cada elemento del multiset, se lo escribe en el formato "cant_repeticion palabra".
-        for (int i=0; i<size_lista; i++){
-            elemento_t * elem_i = lista_elemento(&L, i);
-            fprintf(file, "%d\t%s", elem_i->a, elem_i->b);
-        }
-
         //Elimino todos los elementos de la lista L.
         for (int i=0; i<size_lista; i++){
             elemento_t * elem = lista_eliminar(&L, 0);
+            fprintf(file, "%d   %s\n", elem->a, elem->b);
             aux_liberar_memoria_elemento(elem);
         }
     }
+
+    L.cantidad = 0;
+    L.primera = NULL;
 }
 
 void cuentapalabras_construir_archivos_salida(char* directorio, char** nombre_archivo, int cant_filas){
@@ -374,7 +383,7 @@ void cuentapalabras_construir_archivos_salida(char* directorio, char** nombre_ar
     }
 
     //Finalmente, para el multiset_total es cargado en el archivo totales.out
-    aux_exportar_multiset_a_archivo(f_totales, "", multiset_total);
+    aux_exportar_multiset_a_archivo(f_totales, NULL, multiset_total);
 
     //Cerrar archivos iniciales.
     fclose(f_cadauno);

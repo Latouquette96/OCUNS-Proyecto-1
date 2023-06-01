@@ -28,16 +28,11 @@ struct trie {
 static int aux_recuperar_posicion_en_alfabeto(char*ch){
     int value_ch = *ch;
 
-    if ((value_ch>=65) && (value_ch<=90)){
-        value_ch = value_ch - 65;
+    if ((value_ch>=97) && (value_ch<=122)){
+        value_ch = value_ch - 97;
     }
     else{
-        if ((value_ch>=97) && (value_ch<=122)){
-            value_ch = value_ch - 97;
-        }
-        else{
-            value_ch = -1;
-        }
+        value_ch = -1;
     }
 
     return value_ch;
@@ -80,7 +75,7 @@ static elemento_t aux_construir_elemento(int cant_repeticiones, char* s, int len
     for (int i=0; i<length_s; i++){
         secuencia[i] = s[i];
     }
-    secuencia[length_s] = '\n';
+    secuencia[length_s] = '\0';
     elem->b = secuencia;
 
     return *elem;
