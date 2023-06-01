@@ -210,8 +210,6 @@ lista_t multiset_elementos(multiset_t *m, int (*f)(elemento_t, elemento_t)){
     //Se procede a cargar la lista de manera semi-recursiva.
     aux_cargar_elementos_en_lista(L, T, s, 0);
 
-    lista_ordenar(L, *f);
-
     return *L;
 }
 
@@ -221,7 +219,10 @@ lista_t multiset_elementos(multiset_t *m, int (*f)(elemento_t, elemento_t)){
 */
 static void aux_liberar_memoria(struct trie *nodo){
     nodo->cantidad = 0;
-    free(nodo->siguiente);
+    for (int i=0; i<26; i++){
+        nodo->siguiente[i] = NULL;
+        free(nodo->siguiente[i]);
+    }
     free(nodo);
     nodo = NULL;
 }

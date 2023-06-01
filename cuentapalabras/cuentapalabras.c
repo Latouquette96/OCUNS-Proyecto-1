@@ -14,7 +14,11 @@ información en archivos de salida.
 #include <dirent.h> //Utilizada para obtener los archivos de los directorios.
 #include "multiset.h"
 #include "lista.h"
-#include "cuentapalabras.h"
+
+#define CUENTAPALABRAS_ERROR_CONTADOR           -5
+#define CUENTAPALABRAS_ARCHIVOS_GENERADOS       -6
+#define CUENTAPALABRAS_ERROR_APERTURA_ARCHIVO   -7
+#define MAXCHAR 5000
 
 //---FUNCIONES PRINCIPALES-----
 
@@ -24,10 +28,10 @@ información en archivos de salida.
  * @param elem2 Puntero a un elemento_t.
  * @return ELEM1_MAYOR_QUE_ELEM2 si elem1>elem2, ELEM1_MENOR_QUE_ELEM2 si elem1<elem2 y ELEM1_IGUAL_QUE_ELEM2 si elem1=elem2.
 */
-int funcion_comparacion(elemento_t elem1, elemento_t elem2){
+comparacion_resultado_t funcion_comparacion(elemento_t * elem1, elemento_t * elem2){
     int to_return;
-    int valor_elem_1 = elem1.a;
-    int valor_elem_2 = elem2.a;
+    int valor_elem_1 = elem1->a;
+    int valor_elem_2 = elem2->a;
 
     //Si la cantidad de repeticiones de ELEM1 es mayor a ELEM2
     if (valor_elem_1>valor_elem_2){
@@ -41,12 +45,12 @@ int funcion_comparacion(elemento_t elem1, elemento_t elem2){
         else{
             //En caso de igualdad, comparar por las cadenas.
             //Si el texto de ELEM1 es mayor a ELEM2
-            if (strcmp(elem1.b, elem2.b)>0){
+            if (strcmp(elem1->b, elem2->b)>0){
                 to_return = ELEM1_MAYOR_QUE_ELEM2;
             }
             else{
                 //Si el texto de ELEM1 es menor a ELEM2
-                if (strcmp(elem1.b, elem2.b)==0){
+                if (strcmp(elem1->b, elem2->b)==0){
                     to_return = ELEM1_IGUAL_QUE_ELEM2;
                 }
                 else{
@@ -60,6 +64,10 @@ int funcion_comparacion(elemento_t elem1, elemento_t elem2){
     return to_return;
 }
 
+/**
+* @brief Libera la memoria reservada por el elemento en cuestion.
+* @param elem Puntero a elemento.
+*/
 static void aux_liberar_memoria_elemento(elemento_t * elem){
     elem->a = 0;
     free(elem->b);
@@ -67,11 +75,63 @@ static void aux_liberar_memoria_elemento(elemento_t * elem){
     elem = NULL;
 }
 
+//----FUNCIONES PARA MOSTRAR MENSAJES INICIALES EN CONSOLA-----
+
+/**
+* Imprime un mensaje de bienvenida al programa.
+*/
+static void mostrar_mensaje_bienvenida(){
+    printf("+-----------------------------------------------------------------+\n");
+    printf("|          Proyecto: Programacion en C - Cuentapalabras           |\n");
+    printf("| Autores: Comision #17 (David Emanuel Latouquette - Otto Krause) |\n");
+    printf("+-----------------------------------------------------------------+\n\n");
+    printf("FUNCIONAMIENTO:\n");
+    printf("El presente proyecto recibe un directorio, lee los archivos de texto y contabiliza las palabras en dos archivos:\n");
+    printf("  -'cadauno.out' que contiene la cantidad de veces que aparece cada palabra en en cada uno de los archivos.\n");
+    printf("  -'totales.out' que contiene la cantidad de veces que aparece cada palabra entre todos los archivos.\n");
+}
+
+/**
+ * @brief Imprime un mensaje con los parámetros a emplear para invocar el programa correctamente.
+*/
+static void mostrar_mensaje_opciones(){
+    printf("Bienvenido al programa cuentapalabras. El programa admite los siguientes parametros opcionales:\n\n");
+    printf("[-h] [directorio de entrada]: Dado el directorio de archivos de texto, se procesa cada archivo contabilizando las palabras de cada uno de los archivos.\n");
+    printf("  -Genera un archivo 'cadauno.out' que contiene la cantidad de veces que aparece cada palabra en en cada uno de los archivos.\n");
+    printf("  -Genera un archivo 'totales.out' que contiene la cantidad de veces que aparece cada palabra entre todos los archivos.\n");
+}
+
+/**
+ * @brief Imprime un mensaje que indica que la ruta de directorio no es válida.
+*/
+static void mostrar_mesnsaje_ruta_invalida(){
+    printf("Ruta inválida. Ejecute el programa nuevamente con un directorio válido.\n");
+}
+
+/**
+* @brief Imprime un mensaje mostrando los nombres de los archivos de texto a analizar en el directorio dado.
+* @param directorio Puntero a cadena de caracteres que representa el directorio.
+* @param nombre Puntero de punteros de cadenas de caracteres que contiene los nombres de los archivos a analizar.
+* @param cant_nombres Entero que representa la cantidad de archivos a analizar.
+*/
+static void mostrar_mensaje_archivos_a_analizar(char* directorio, char ** nombre, int cant_nombres){
+    printf("ANALISIS DE ARCHIVOS\n");
+    printf("Directorio '%s' analizado. Se encontraron los siguientes archivos de texto:\n", directorio);
+    for (int i=0; i<cant_nombres; i++){
+        printf("  -%s\n", nombre[i]);
+    }
+}
+
+
 
 //----FUNCIONES PARA LA COMPROBACIÓN DEL DIRECTORIO Y ARCHIVOS------
 
-
-DIR* cuentapalabras_abrir_directorio(char *path){
+/**
+* @brief Abre el directorio dado por la ruta path y retorna su controlador.
+* @param path Puntero a cadena de caracteres que representa el directorio.
+* @return Puntero al controlador de directorio o NULL si el directorio dado no es válido.
+*/
+static DIR* cuentapalabras_abrir_directorio(char *path){
     DIR *d = opendir(path);
     return d;
 }
@@ -95,7 +155,13 @@ static int aux_es_archivo_txt(char *name){
     return to_return;
 }
 
-char** cuentapalabras_recopilar_nombres_archivos_txt(DIR *d, int*cant_filas){
+/**
+* @brief Dado un controlador del directorio, se recopila todos los archivos de textos existentes en dicho directorio y se retorna un puntero a punteros de cadenas de caracteres.
+* @param d Puntero al controlador de directorio.
+* @param cant_filas Puntero a un entero, donde se almacenará la cantidad de archivos de texto encontrados.
+* @param
+*/
+static char** cuentapalabras_recopilar_nombres_archivos_txt(DIR *d, int*cant_filas){
     int cant = 0;
     int cursor = 0;
     struct dirent * dir = readdir(d);
@@ -230,7 +296,9 @@ static void aux_exportar_multiset_a_archivo(FILE *file, char* nombre_archivo, mu
         fprintf(file, "%s\n", nombre_archivo);
     }
 
-    lista_t L = multiset_elementos(multiset_archivo, &funcion_comparacion);
+    //Recupera la lista de elementos del multiset.
+    lista_t L = multiset_elementos(multiset_archivo, NULL);
+    lista_ordenar(&L, funcion_comparacion);
 
     //Si la lista no está vacia, entonces se procede a recorrerla para obtener los elementos.
     if (lista_vacia(L)==FALSE){
@@ -251,7 +319,9 @@ static void aux_exportar_multiset_a_archivo(FILE *file, char* nombre_archivo, mu
 }
 
 void cuentapalabras_construir_archivos_salida(char* directorio, char** nombre_archivo, int cant_filas){
-    //Crea un multiset donde se almacenarán todas las palabras leidas.
+    //
+    multiset_t **m = (multiset_t**) malloc(sizeof(multiset_t*));
+
     multiset_t* multiset_total = multiset_crear();
     //Ruta hacia los archivos cadauno.out y otro para totales.out.
     char path_cadauno[100];
@@ -281,11 +351,11 @@ void cuentapalabras_construir_archivos_salida(char* directorio, char** nombre_ar
         strcat(path, nombre_archivo[i]);
 
         //Lee el archivo i y carga las palabras en el multiset_total, devolviendo un multiset cargado con las palabras leidas en la iteración I.
-        multiset_t* multiset_archivo = aux_cargar_multiset(path, multiset_total);
+        m[0] = aux_cargar_multiset(path, multiset_total);
         //Escribir el contenido del multiset_archivo en el archivo de salida.
-        aux_exportar_multiset_a_archivo(f_cadauno,  nombre_archivo[i], multiset_archivo);
+        aux_exportar_multiset_a_archivo(f_cadauno,  nombre_archivo[i], m[0]);
         //Elimina el multiset i
-        multiset_eliminar(multiset_archivo);
+        multiset_eliminar(m);
     }
 
     //Finalmente, para el multiset_total es cargado en el archivo totales.out
@@ -296,5 +366,62 @@ void cuentapalabras_construir_archivos_salida(char* directorio, char** nombre_ar
     fclose(f_totales);
 
     //Liberar memoria reservadas para multisets
-    multiset_eliminar(multiset_total);
+    //multiset_eliminar(multiset_total);
 }
+
+//----MAIN----
+
+int main(int argc, char *argv[]){
+    //Por defecto, siempre se pasa un parámetro que es el directorio en donde se ejecuta el programa.
+    //Por lo tanto, argc es 1 o mayor a 1.
+    if (argc==1){
+        mostrar_mensaje_opciones();
+    }
+    else{
+        //Si la comparacion devuelve 0, entonces se tiene que ambas cadenas son iguales.
+        if (strcmp(argv[1], "-h")==0){
+            mostrar_mensaje_bienvenida();
+            //Abre el directorio y recupera el puntero al manejador de archivos.
+            DIR* dir = cuentapalabras_abrir_directorio(argv[2]);
+            //Si el puntero no es nulo, esto es, que el directorio era válido.
+            if (dir!=NULL){
+                printf("Directorio a analizar: %s\n\n", argv[2]);
+                //Reservo memoria para el contador de filas (nombres) del directorio.
+                int * p_cant_filas = malloc(sizeof(int));
+                //Si no se reservó memoria, entonces terminar ejecución.
+                if (p_cant_filas==NULL){
+                    exit(CUENTAPALABRAS_ERROR_CONTADOR);
+                }
+                //Inicializo en cero el contenido de lo apuntado por el puntero cant_filas.
+                (*p_cant_filas) = 0;
+
+                //Recupero todos los nombres de archivos de texto.
+                char** nombre_archivo = cuentapalabras_recopilar_nombres_archivos_txt(dir, p_cant_filas);
+                int cant_filas = *p_cant_filas;
+                //Muestra los archivos de texto del directorio.
+                mostrar_mensaje_archivos_a_analizar(argv[2], nombre_archivo, *p_cant_filas);
+                //Ya no se necesita del DIR, por lo tanto, se cierra.
+                closedir(dir);
+                //Realizar la construcción de los archivos de salida.
+                cuentapalabras_construir_archivos_salida(argv[2], nombre_archivo, cant_filas);
+                //Libera la memoria utilizada por nombre_archivo y su respectivo contador.
+                cuentapalabras_liberar_memoria_nombres_archivos(nombre_archivo, cant_filas);
+                free(p_cant_filas);
+
+                printf("\nARCHIVOS GENERADOS\n");
+                printf("Archivos 'cadauno.out' y 'totales.out' creados con exito en el directorio '%s'.\n", argv[2]);
+            }
+            else{
+                //Puesto que no existe o no se abrió el directorio, entonces se tiene que es una ruta inválida.
+                mostrar_mesnsaje_ruta_invalida();
+            }
+        }
+        else{
+            //Si la cadena es distinta a "-h", entonces mostrar mensaje con opciones.
+            mostrar_mensaje_opciones();
+        }
+    }
+
+    return 0;
+}
+

@@ -60,15 +60,18 @@ static celda_t * aux_construir_celda_nueva(elemento_t * e){
         exit(ERROR_LISTA_MEMORIA);
     }
     ///Asignar los valores correspondientes.
+
     celda_nueva->elem = (elemento_t*) malloc(sizeof(struct elemento));
     if (celda_nueva->elem==NULL){
         exit(ERROR_LISTA_MEMORIA);
     }
-    ///Copio en profundidad los datos del elemento para poder almacenarlos en la lista.
+    /*
+    ///ELIMINAR: Copio en profundidad los datos del elemento para poder almacenarlos en la lista.
     celda_nueva->elem->a = e->a;
     celda_nueva->elem->b = (char*) malloc((strlen(e->b)+1)*sizeof(char));
     strcpy(celda_nueva->elem->b, e->b);
-
+    */
+    *(celda_nueva->elem) = *e;
     celda_nueva->siguiente = NULL;
 
     return celda_nueva;
