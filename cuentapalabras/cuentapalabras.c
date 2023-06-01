@@ -15,10 +15,12 @@ información en archivos de salida.
 #include "multiset.h"
 #include "lista.h"
 
-#define CUENTAPALABRAS_ERROR_CONTADOR           -5
-#define CUENTAPALABRAS_ARCHIVOS_GENERADOS       -6
-#define CUENTAPALABRAS_ERROR_APERTURA_ARCHIVO   -7
-#define MAXCHAR 500
+#define ERROR_CUENTAPALABRAS_CONTADOR                 -5
+#define CUENTAPALABRAS_ARCHIVOS_GENERADOS             -6
+#define ERROR_CUENTAPALABRAS_APERTURA_ARCHIVO         -7
+#define ERROR_CUENTAPALABRAS_CREACION_ARCHIVO_SALIDA - 8
+#define ERROR_CUENTAPALABRAS_MEMORIA                  -9
+#define ERROR_CUENTAPALABRAS_APERTURA_DIRECTORIO      -10
 
 //---FUNCIONES PRINCIPALES-----
 
@@ -104,8 +106,8 @@ static void mostrar_mensaje_opciones(){
 /**
  * @brief Imprime un mensaje que indica que la ruta de directorio no es válida.
 */
-static void mostrar_mesnsaje_ruta_invalida(){
-    printf("Ruta inválida. Ejecute el programa nuevamente con un directorio válido.\n");
+static void mostrar_mensaje_ruta_invalida(){
+    printf("\nError %d: Ruta invalida. Ejecute el programa nuevamente con un directorio valido.\n", ERROR_CUENTAPALABRAS_APERTURA_DIRECTORIO);
 }
 
 /**
@@ -121,8 +123,6 @@ static void mostrar_mensaje_archivos_a_analizar(char* directorio, char ** nombre
         printf("  -%s\n", nombre[i]);
     }
 }
-
-
 
 //----FUNCIONES PARA LA COMPROBACIÓN DEL DIRECTORIO Y ARCHIVOS------
 
@@ -146,7 +146,9 @@ static int aux_es_archivo_txt(char *name){
     int to_return = FALSE;
     int longitud_name = strlen(name);
 
+    //Si el nombre del archivo tiene mas de 3 caractes (incluyendo extension)
     if (longitud_name>3){
+        //Compruebo si dicho nombre finaliza con ".txt"
         if (name[longitud_name-3]=='t' && name[longitud_name-2]=='x' && name[longitud_name-1]=='t'){
             to_return=TRUE;
         }
@@ -159,7 +161,7 @@ static int aux_es_archivo_txt(char *name){
 * @brief Dado un controlador del directorio, se recopila todos los archivos de textos existentes en dicho directorio y se retorna un puntero a punteros de cadenas de caracteres.
 * @param d Puntero al controlador de directorio.
 * @param cant_filas Puntero a un entero, donde se almacenará la cantidad de archivos de texto encontrados.
-* @param
+* @return Puntero a punteros de cadenas de caracteres que representan los nombres de los archivos de textos encontrados en el directorio dado.
 */
 static char** cuentapalabras_recopilar_nombres_archivos_txt(DIR *d, int*cant_filas){
     int cant = 0;
@@ -173,16 +175,28 @@ static char** cuentapalabras_recopilar_nombres_archivos_txt(DIR *d, int*cant_fil
         }
         dir = readdir(d);
     }
-
+    //Reservo memoria para el puntero de punteros de cadenas de caracteres (nombres de los archivos de texto).
     char** arreglo_nombre = (char**) malloc(cant*sizeof(char*));
+    if (arreglo_nombre==NULL){
+        printf("Error %d: No se pudo reservar memoria para los nombres de archivos.\n", ERROR_CUENTAPALABRAS_APERTURA_ARCHIVO);
+        exit(ERROR_CUENTAPALABRAS_APERTURA_ARCHIVO);
+    }
+
     //Restablece la posicion del DIR.
     rewinddir(d);
     dir = readdir(d);
 
+    //Mientras que dir no sea nulo
     while(dir!=NULL){
+        //El nombre recuperado del elemento es un archivo de texto, entonces copiar el nombre al arreglo.
         if (aux_es_archivo_txt(dir->d_name)==TRUE){
             int longitud_cadena = strlen(dir->d_name);
             arreglo_nombre[cursor] = malloc(longitud_cadena*sizeof(char)+1);
+
+            if (arreglo_nombre[cursor]==NULL){
+                printf("Error %d: No se pudo reservar memoria para la cadena.\n", ERROR_CUENTAPALABRAS_MEMORIA);
+                exit(ERROR_CUENTAPALABRAS_MEMORIA);
+            }
             strcpy(arreglo_nombre[cursor], dir->d_name);
             cursor = cursor + 1;
         }
@@ -217,6 +231,7 @@ static void cuentapalabras_liberar_memoria_nombres_archivos(char** C, int cant_f
  * @return TRUE si es una cadena sin caracteres especiales, de lo contrario, retorna FALSE.
 */
 static int aux_es_palabra_sin_caracteres_especiales(char* ch){
+    //Asumo que la cadena es válida.
     int to_return = TRUE;
 
     //Si la cadena es distinto a una cadena vacía.
@@ -229,11 +244,13 @@ static int aux_es_palabra_sin_caracteres_especiales(char* ch){
                 ch++;
             }
             else{
+                //Puesto que se encontró un caracter especial, entonces la cadena no es valida.
                 to_return = FALSE;
             }
         }
     }
     else{
+        //es una cadena vacia, por lo tanto, no es una cadena válida.
         to_return = FALSE;
     }
 
@@ -247,8 +264,10 @@ static int aux_es_palabra_sin_caracteres_especiales(char* ch){
 * @return Puntero a cadena creada o NULL si la cadena en cuestión en un caracter separador de palabras.
 */
 static char * aux_recuperar_cadena(FILE *f, int longitud_cadena){
+    //Recupero el caracter a leer.
     char ch_actual = fgetc(f);
 
+    //Si ch_actual es algun caracter que indique fin de cadena a considerar.
     if ((feof(f)) || (ch_actual==' ') || (ch_actual=='\n') || (ch_actual=='.') || (ch_actual==':') || (ch_actual==';') || (ch_actual==',') || (ch_actual=='\0')){
         //CB: Si la longitud es 0, entonces no hay cadena que crear.
         if (longitud_cadena==0){
@@ -257,12 +276,17 @@ static char * aux_recuperar_cadena(FILE *f, int longitud_cadena){
         else{
             //CB: Si la longitud es mayor a 1, entonces hay una palabra de por lo menos un char.
             char * cadena = (char*) malloc((longitud_cadena+1)*sizeof(char));
+            if (cadena==NULL){
+                printf("Error %d: No se pudo reservar memoria para la cadena.\n", ERROR_CUENTAPALABRAS_MEMORIA);
+                exit(ERROR_CUENTAPALABRAS_MEMORIA);
+            }
             cadena[longitud_cadena] = '\0';
 
             return cadena;
         }
     }
     else{
+        //CR: Bloque de caracteres dentro de la cadena.
         char * cadena = aux_recuperar_cadena(f, longitud_cadena+1);
         cadena[longitud_cadena] = ch_actual;
 
@@ -283,19 +307,22 @@ static multiset_t* aux_cargar_multiset(char*path, multiset_t *m_total){
     FILE* f = fopen(path, "r");
     //Si no se abre el archivo, entonces ha ocurrido un error.
     if (f==NULL){
-        printf("Error -7: Error en apertura de archivo");
-        exit(CUENTAPALABRAS_ERROR_APERTURA_ARCHIVO);
+        printf("Error -7: Error en apertura de archivo\n");
+        exit(ERROR_CUENTAPALABRAS_APERTURA_ARCHIVO);
     }
 
-    //Mientras que haya algo que leer en el archivo.
+    //Mientras que exista algo que leer en el archivo.
     while (!feof(f)) {
+        //Recupero un puntero a la cadena de caracteres a analizar.
         char * cadena = aux_recuperar_cadena(f, 0);
 
+        //Si el puntero no es NULO y ademas es una palabra sin caracteres especiales, entonces se inserta en los multiset's.
         if ((cadena!=NULL) && (aux_es_palabra_sin_caracteres_especiales(cadena)==TRUE)){
             multiset_insertar(m_return, cadena);
             multiset_insertar(m_total, cadena);
         }
 
+        //Finalmente libero la memoria reservada para la cadena.
         free(cadena);
     }
 
@@ -319,12 +346,8 @@ static void aux_exportar_multiset_a_archivo(FILE *file, char* nombre_archivo, mu
 
     //Recupera la lista de elementos del multiset.
     lista_t L = multiset_elementos(multiset_archivo, NULL);
+    //Se ordena a la ruta recuperada.
     lista_ordenar(&L, funcion_comparacion);
-
-    for (int i=0; i<lista_cantidad(&L); i++){
-        elemento_t * elem = lista_elemento(&L, i);
-        printf("%d   %s\n", elem->a, elem->b);
-    }
 
     //Si la lista no está vacia, entonces se procede a recorrerla para obtener los elementos.
     if (lista_vacia(L)==FALSE){
@@ -342,11 +365,32 @@ static void aux_exportar_multiset_a_archivo(FILE *file, char* nombre_archivo, mu
     L.primera = NULL;
 }
 
-void cuentapalabras_construir_archivos_salida(char* directorio, char** nombre_archivo, int cant_filas){
-    //
+/**
+* @brief Realiza la construcción de los archivos cadauno.out y totales.out en base a los archivos de textos encontrados en el directorio dado.
+* Importante: Los mencionados archivos a construir se escribirán en el directorio dado.
+* @param directorio Puntero a cadena de caracteres que representa el directorio.
+* @param nombre_archivo Puntero a punteros de cadenas de caracteres que representan los nombres de los archivos.
+* @param cant_filas Entero que indica la cantidad de archivos de textos a leer.
+*/
+static void cuentapalabras_construir_archivos_salida(char* directorio, char** nombre_archivo, int cant_filas){
+    //Reservo memoria para un puntero a puntero de multiset con el fin de emplear multiset_eliminar.
     multiset_t **m = (multiset_t**) malloc(sizeof(multiset_t*));
-
+    if (m==NULL){
+        printf("Error %d: Memoria no reservada por el sistema\n", ERROR_CUENTAPALABRAS_MEMORIA);
+        exit(ERROR_CUENTAPALABRAS_MEMORIA);
+    }
+    //Se construye el multiset donde se acumularan todas las palabras de todos los archivos.
     multiset_t* multiset_total = multiset_crear();
+
+    /*
+    * Tanto el path_cadauno como el path_totales se obtienen al realizar el siguientes procedimiento, el cual se realiza de
+        este modo para no afectar al puntero directorio.
+    *
+    * Procedimiento:
+    *   1. Al path, se le copia el contenido de directorio.
+    *   2. Al contenido de path, se le suma \archivo.out, donde archivo en el nombre del archivo en cuestion.
+    */
+
     //Ruta hacia los archivos cadauno.out y otro para totales.out.
     char path_cadauno[100];
     strcpy(path_cadauno, directorio);
@@ -359,11 +403,13 @@ void cuentapalabras_construir_archivos_salida(char* directorio, char** nombre_ar
     //Crea dos punteros a archivos, uno para el archivo cadauno.out y otro para totales.out.
     FILE * f_cadauno = fopen(path_cadauno, "w"); //Solo escribe.
     if (f_cadauno==NULL){
-        exit(CUENTAPALABRAS_ERROR_APERTURA_ARCHIVO);
+        printf("Error -8: Error en creacion de archivo: cadauno.out\n");
+        exit(ERROR_CUENTAPALABRAS_CREACION_ARCHIVO_SALIDA);
     }
     FILE * f_totales = fopen(path_totales, "w"); //Solo escribe.
     if (f_totales==NULL){
-        exit(CUENTAPALABRAS_ERROR_APERTURA_ARCHIVO);
+        printf("Error -8: Error en creacion de archivo: totales.out\n");
+        exit(ERROR_CUENTAPALABRAS_CREACION_ARCHIVO_SALIDA);
     }
 
     //Para cada archivo_i.
@@ -390,7 +436,12 @@ void cuentapalabras_construir_archivos_salida(char* directorio, char** nombre_ar
     fclose(f_totales);
 
     //Liberar memoria reservadas para multisets
-    //multiset_eliminar(multiset_total);
+    m[0] = multiset_total;
+    multiset_eliminar(m);
+
+    //Libera la memoria para el puntero m
+    free(m);
+    m = NULL;
 }
 
 //----MAIN----
@@ -407,14 +458,16 @@ int main(int argc, char *argv[]){
             mostrar_mensaje_bienvenida();
             //Abre el directorio y recupera el puntero al manejador de archivos.
             DIR* dir = cuentapalabras_abrir_directorio(argv[2]);
+
             //Si el puntero no es nulo, esto es, que el directorio era válido.
             if (dir!=NULL){
                 printf("Directorio a analizar: %s\n\n", argv[2]);
                 //Reservo memoria para el contador de filas (nombres) del directorio.
-                int * p_cant_filas = malloc(sizeof(int));
+                int * p_cant_filas = (int*) malloc(sizeof(int));
                 //Si no se reservó memoria, entonces terminar ejecución.
                 if (p_cant_filas==NULL){
-                    exit(CUENTAPALABRAS_ERROR_CONTADOR);
+                    printf("Error %d: El sistema no reservo memoria para el contador de archivos\n", ERROR_CUENTAPALABRAS_CONTADOR);
+                    exit(ERROR_CUENTAPALABRAS_CONTADOR);
                 }
                 //Inicializo en cero el contenido de lo apuntado por el puntero cant_filas.
                 (*p_cant_filas) = 0;
@@ -422,22 +475,34 @@ int main(int argc, char *argv[]){
                 //Recupero todos los nombres de archivos de texto.
                 char** nombre_archivo = cuentapalabras_recopilar_nombres_archivos_txt(dir, p_cant_filas);
                 int cant_filas = *p_cant_filas;
-                //Muestra los archivos de texto del directorio.
-                mostrar_mensaje_archivos_a_analizar(argv[2], nombre_archivo, *p_cant_filas);
-                //Ya no se necesita del DIR, por lo tanto, se cierra.
-                closedir(dir);
-                //Realizar la construcción de los archivos de salida.
-                cuentapalabras_construir_archivos_salida(argv[2], nombre_archivo, cant_filas);
-                //Libera la memoria utilizada por nombre_archivo y su respectivo contador.
-                cuentapalabras_liberar_memoria_nombres_archivos(nombre_archivo, cant_filas);
+
+                //Si hay archivos de texto a leer.
+                if (cant_filas>0){
+                    //Muestra los archivos de texto del directorio.
+                    mostrar_mensaje_archivos_a_analizar(argv[2], nombre_archivo, *p_cant_filas);
+                    //Realizar la construcción de los archivos de salida.
+                    cuentapalabras_construir_archivos_salida(argv[2], nombre_archivo, cant_filas);
+                    //Libera la memoria utilizada por nombre_archivo y su respectivo contador.
+                    cuentapalabras_liberar_memoria_nombres_archivos(nombre_archivo, cant_filas);
+
+                    printf("\nARCHIVOS GENERADOS\n");
+                    printf("Archivos 'cadauno.out' y 'totales.out' creados con exito en el directorio '%s'.\n", argv[2]);
+                }
+                else{
+                    printf("\nDIRECTORIO SIN ARCHIVOS DE TEXTO:\n");
+                    printf("Los archivos 'cadauno.out' y 'totales.out' no fueron generados.\n");
+                }
+
+                //Libero la memoria utilizada.
                 free(p_cant_filas);
 
-                printf("\nARCHIVOS GENERADOS\n");
-                printf("Archivos 'cadauno.out' y 'totales.out' creados con exito en el directorio '%s'.\n", argv[2]);
+                //Cierra el directorio.
+                closedir(dir);
             }
             else{
                 //Puesto que no existe o no se abrió el directorio, entonces se tiene que es una ruta inválida.
-                mostrar_mesnsaje_ruta_invalida();
+                mostrar_mensaje_ruta_invalida();
+                exit(ERROR_CUENTAPALABRAS_APERTURA_DIRECTORIO);
             }
         }
         else{

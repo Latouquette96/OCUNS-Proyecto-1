@@ -34,6 +34,7 @@ lista_t *lista_crear(){
     lista_t *L = (struct lista*)malloc(sizeof(struct lista));
     //Si no se realiza la reservación de memoria, entonces se interrumpe la ejecución del programa.
     if (L==NULL){
+        printf("Error %d: No se pudo reservar memoria para la lista.\n", ERROR_LISTA_MEMORIA);
         exit(ERROR_LISTA_MEMORIA);
     }
     //Actualiza los atributos de la lista para modelar una lista vacía.
@@ -57,26 +58,22 @@ static celda_t * aux_construir_celda_nueva(elemento_t * e){
     celda_t * celda_nueva = (struct celda*) malloc(sizeof(struct celda));
     ///Si no se ha reservado memoria para la nueva celda, salir del programa.
     if (celda_nueva==NULL){
+        printf("Error %d: No se pudo reservar memoria para la lista.\n", ERROR_LISTA_MEMORIA);
         exit(ERROR_LISTA_MEMORIA);
     }
     ///Asignar los valores correspondientes.
 
     celda_nueva->elem = (elemento_t*) malloc(sizeof(struct elemento));
     if (celda_nueva->elem==NULL){
+        printf("Error %d: No se pudo reservar memoria para la lista.\n", ERROR_LISTA_MEMORIA);
         exit(ERROR_LISTA_MEMORIA);
     }
-    /*
-    ///ELIMINAR: Copio en profundidad los datos del elemento para poder almacenarlos en la lista.
-    celda_nueva->elem->a = e->a;
-    celda_nueva->elem->b = (char*) malloc((strlen(e->b)+1)*sizeof(char));
-    strcpy(celda_nueva->elem->b, e->b);
-    */
+
     *(celda_nueva->elem) = *e;
     celda_nueva->siguiente = NULL;
 
     return celda_nueva;
 }
-
 
 int lista_insertar(lista_t *l, elemento_t elem, unsigned int pos){
     int to_return = TRUE;
@@ -123,7 +120,6 @@ int lista_insertar(lista_t *l, elemento_t elem, unsigned int pos){
                     celda_nueva->siguiente = celda_siguiente;
                 }
             }
-
         }
         l->cantidad = long_list + 1;
     }
@@ -147,9 +143,11 @@ elemento_t *lista_eliminar(lista_t *l, unsigned int pos){
     celda_t * celda_siguiente;
     celda_t * celda_eliminar;
 
+    //Si elimino una posicion dentro de la lista.
     if (pos<long_list){
         celda_actual = l->primera;
 
+        //Si es la primera posicion.
         if (pos==0){
             to_return = celda_actual->elem;
             celda_siguiente = celda_actual->siguiente;

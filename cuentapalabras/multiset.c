@@ -59,8 +59,9 @@ static char aux_recuperar_caracter_en_posicion(int pos){
 static elemento_t aux_construir_elemento(int cant_repeticiones, char* s, int length_s){
     //Reservacián de memoria
     elemento_t *elem = (elemento_t*) malloc(sizeof(elemento_t));
-    //Si no se reserva memoria, entonces el programa finaliza indicando el error en cuestián.
+    //Si no se reserva memoria, entonces el programa finaliza indicando el error en cuestion.
     if (elem==NULL){
+        printf("Error %d: No se pudo reservar memoria para el elemento.\n", ERROR_ELEMENTO_MEMORIA);
         exit(ERROR_ELEMENTO_MEMORIA);
     }
     //Establece el valor a, esto es, la cantidad de repeticiones.
@@ -68,13 +69,17 @@ static elemento_t aux_construir_elemento(int cant_repeticiones, char* s, int len
 
     //Establece el valor b, esto es, la secuencia de caracteres.
     char *secuencia = (char*)malloc(sizeof(char)*(length_s+1));
+    //Si no se reserva memoria, entonces el programa finaliza indicando el error en cuestion.
     if (secuencia==NULL){
+        printf("Error %d: No se pudo reservar memoria para el dato b del elemento.\n", ERROR_ELEMENTO_MEMORIA);
         exit(ERROR_ELEMENTO_MEMORIA);
     }
 
+    //Realiza la carga de los caracteres de la secuencia recibida.
     for (int i=0; i<length_s; i++){
         secuencia[i] = s[i];
     }
+    //El ultimo caracter es será el caracter nulo o fin de cadena.
     secuencia[length_s] = '\0';
     elem->b = secuencia;
 
@@ -124,6 +129,7 @@ multiset_t *multiset_crear(){
     multiset_t *M = (struct trie*)malloc(sizeof(struct trie));
     //Si no se reservá memoria, entonces el programa finaliza indicando el error.
     if (M==NULL){
+        printf("Error %d: No se pudo reservar memoria para el multiset.\n", ERROR_MULTISET_MEMORIA);
         exit(ERROR_MULTISET_MEMORIA);
     }
     M->cantidad = 0;
