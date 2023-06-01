@@ -18,17 +18,17 @@ información en archivos de salida.
 #define CUENTAPALABRAS_ERROR_CONTADOR           -5
 #define CUENTAPALABRAS_ARCHIVOS_GENERADOS       -6
 #define CUENTAPALABRAS_ERROR_APERTURA_ARCHIVO   -7
-#define MAXCHAR 5000
+#define MAXCHAR 500
 
 //---FUNCIONES PRINCIPALES-----
 
 /**
- * @brief Función de comparación de dos elementos.
+ * @brief Función de comparación de dos elementos que permite identificar cual elemento es mayor, menor o igual que otro.
  * @param elem1 Puntero a un elemento_t.
  * @param elem2 Puntero a un elemento_t.
  * @return ELEM1_MAYOR_QUE_ELEM2 si elem1>elem2, ELEM1_MENOR_QUE_ELEM2 si elem1<elem2 y ELEM1_IGUAL_QUE_ELEM2 si elem1=elem2.
 */
-comparacion_resultado_t funcion_comparacion(elemento_t * elem1, elemento_t * elem2){
+static comparacion_resultado_t funcion_comparacion(elemento_t * elem1, elemento_t * elem2){
     int to_return;
     int valor_elem_1 = elem1->a;
     int valor_elem_2 = elem2->a;
@@ -195,7 +195,12 @@ static char** cuentapalabras_recopilar_nombres_archivos_txt(DIR *d, int*cant_fil
     return arreglo_nombre;
 }
 
-void cuentapalabras_liberar_memoria_nombres_archivos(char** C, int cant_filas){
+/**
+* @brief Libera la memoria reservada para los nombres de los archivos recuperados.
+* @param C Puntero a punteros de cadenas de caracteres.
+* @param cant_filas Entero positivo que representa la cantidad de archivos a eliminar.
+*/
+static void cuentapalabras_liberar_memoria_nombres_archivos(char** C, int cant_filas){
     //Libera el espacio para cada una de las filas de caracteres.
     for (int i=0; i<cant_filas; i++){
         free(C[i]);
@@ -214,15 +219,19 @@ void cuentapalabras_liberar_memoria_nombres_archivos(char** C, int cant_filas){
 static int aux_es_palabra_sin_caracteres_especiales(char* ch){
     int to_return = TRUE;
 
-    while(*ch!='\0' && to_return==TRUE){
+    //Si la cadena es distinto a una cadena vacía.
+    if ((*ch)!='\0'){
+        //Mientras el caracter recuperado no sea el fin de cadena y se mantenga la condicion de que es palabra.
+        while(*ch!='\0' && to_return==TRUE){
         //Si es un caracter alfabetico en MAYUSCULAS o minusculas.
-        if (((*ch)>=65 && (*ch)<=90) || ((*ch)>=97 && (*ch)<=122)){
+        if ((*ch)>=97 && (*ch)<=122){
             //Apuntar al siguiente char.
             ch++;
         }
         else{
             to_return = FALSE;
         }
+    }
     }
 
     return to_return;
@@ -250,12 +259,18 @@ static multiset_t* aux_cargar_multiset(char*path, multiset_t *m_total){
     }
 
     char linea_actual[MAXCHAR];
-    char filtro[] = {' ', '\n', '\t', '.', ';', ',', '\0'};
+    char filtro[] = {' ', '\n', '\t', '.', ':', ';', ',', '\0'};
 
     //Mientras que haya algo que leer en el archivo.
     while (!feof(f)) {
+        //Limpia el arreglo en cada instancia para no cargar basura.
+        memset(linea_actual, 0, MAXCHAR);
         //Almacema todos los caracteres hasta el salto de línea o hasta el fin del archivo.
         fgets(linea_actual, MAXCHAR, f);
+        for (int i=0; i<MAXCHAR; i++){
+            printf("%c", linea_actual[i]);
+        }
+        printf("\n\n");
         //Punteros de inicio de archivo y de siguiente línea.
         char * pt_linea = linea_actual;
         //Tokeniza la línea de caracteres y devuelve un puntero a un arreglo de palabras.
