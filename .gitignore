@@ -1,5 +1,7 @@
 /bin
 /obj
+/documentacion/
+/documentacion/rtf
 *.o
 *.exe
 *.depend
@@ -7,5 +9,11 @@ cuentapalabras/cuentapalabras.layout
 *.layout
 cuentapalabras/.vscode/c_cpp_properties.json
 *.layout
+*.dot
 cuentapalabras/.vscode/settings.json
 cuentapalabras/cuentapalabras.layout
+cuentapalabras/documentacion/Doxyfile
+*.rtf
+*.json
+*.cbp
+cuentapalabras/cuentapalabras.cbp

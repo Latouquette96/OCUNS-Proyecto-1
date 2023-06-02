@@ -15,8 +15,7 @@ información en archivos de salida.
 #include "multiset.h"
 #include "lista.h"
 
-#define ERROR_CUENTAPALABRAS_CONTADOR                 -5
-#define CUENTAPALABRAS_ARCHIVOS_GENERADOS             -6
+#define ERROR_CUENTAPALABRAS_CONTADOR                 -6
 #define ERROR_CUENTAPALABRAS_APERTURA_ARCHIVO         -7
 #define ERROR_CUENTAPALABRAS_CREACION_ARCHIVO_SALIDA - 8
 #define ERROR_CUENTAPALABRAS_MEMORIA                  -9

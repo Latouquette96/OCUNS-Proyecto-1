@@ -11,6 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Option parameters="-h C:\Users\david\OneDrive\Escritorio\prueba" />
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
@@ -21,6 +22,7 @@
 				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Option parameters="-h C:\Users\david\OneDrive\Escritorio\prueba" />
 				<Compiler>
 					<Add option="-O2" />
 				</Compiler>
@@ -35,15 +37,11 @@
 		<Unit filename="cuentapalabras.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="cuentapalabras.h" />
 		<Unit filename="define.h" />
 		<Unit filename="lista.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="lista.h" />
-		<Unit filename="main.c">
-			<Option compilerVar="CC" />
-		</Unit>
 		<Unit filename="multiset.c">
 			<Option compilerVar="CC" />
 		</Unit>
