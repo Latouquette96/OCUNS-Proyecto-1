@@ -3,14 +3,12 @@
 * @brief Implementación del TDA Lista.
 * El TDA LISTA almacenará elementos pares de la forma <cadena_de_caracteres, entero>.
 * La lista es una lista sin centinela con posición indirecta.
-* La lista a implementar es una lista ordenada.
 *
 * @author Comisión N°17 (David Emanuel Latouquette - Otto Krause)
 */
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "define.h"
 #include "lista.h"
 
@@ -23,12 +21,6 @@ struct celda{
     struct celda *siguiente;
 };
 
-
-/**
-* @brief Crea una lista vacía y la devuelve.
-* Finaliza el programa con ERROR_LISTA_MEMORIA si no se logra reservar memoria para la lista.
-* @return Puntero a una lista con memoria reservada.
-*/
 lista_t *lista_crear(){
     //Reservación de memoria para una lista.
     lista_t *L = (struct lista*)malloc(sizeof(struct lista));
@@ -47,6 +39,7 @@ lista_t *lista_crear(){
 /**
 * @brief Construye una nueva celda con el elemento e contenido en dicha celda y celda siguiente en NULL.
 * @param e Puntero a elemento.
+* @throw ERROR_LISTA_MEMORIA Si no se puedo reservar memoria para una celda o elemento.
 @ @return Una celda con el elemento contenido.
 */
 static celda_t * aux_construir_celda_nueva(elemento_t * e){
@@ -129,13 +122,6 @@ int lista_insertar(lista_t *l, elemento_t elem, unsigned int pos){
     return to_return;
 }
 
-/**
-* @brief Elimina el elemento de la posición 'pos' de la lista y lo retorna.
-* @param l Puntero a la lista de elementos.
-* @param pos Entero positivo que indica la posicion a eliminar (0<pos<n, donde n es el tamaño de la lista).
-* @return El elemento removido de la lista en caso de que la posición pertenezca a la lista (esto es, para una lista de n elemntos, pos<n),
-de lo contrario, retorna NULL.
-*/
 elemento_t *lista_eliminar(lista_t *l, unsigned int pos){
     elemento_t * to_return = NULL;
     int long_list = l->cantidad;
@@ -203,6 +189,11 @@ elemento_t *lista_elemento(lista_t *l, unsigned int pos){
 
 /**
 * @brief Realiza el procedimiento de ordenar la lista recursivamente.
+* @param celda_actual Puntero a la celda actual.
+* @param pos_inicial Entero positivo con la posicion inicial.
+* @param pos_final Entero positivo con la posicion final.
+* @param comparar Funcion de comparacion para realizar el ordenamiento según el criterio que establezca.
+* @return Puntero a elemento con el eleemtno ordenado.
 */
 static elemento_t *aux_ordenar_lista(celda_t *celda_actual, int pos_inicial, int pos_final, funcion_comparacion_t comparar){
     ///Si se llegó al final
@@ -230,12 +221,6 @@ static elemento_t *aux_ordenar_lista(celda_t *celda_actual, int pos_inicial, int
 }
 
 
-/**
-* @brief Dada la lista 'l' y la función 'comparar' ordena la lista de acuerdo al criterio de dicha función.
-* @param l Puntero a la lista de elementos.
-* @param comparar Función de comparación de elementos.
-* @return TRUE si la lista fue ordenada con exito, de lo contrario, false.
-*/
 int lista_ordenar(lista_t *l, funcion_comparacion_t comparar){
     int n = l->cantidad;
 

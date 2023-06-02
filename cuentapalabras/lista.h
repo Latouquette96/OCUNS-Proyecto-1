@@ -61,7 +61,7 @@ typedef struct lista lista_t;
 
 /**
 * @brief Crea una lista vacía y la devuelve.
-* Finaliza el programa con ERROR_LISTA_MEMORIA si no se logra reservar memoria para la lista.
+* @throw ERROR_LISTA_MEMORIA si no se logra reservar memoria para la lista.
 * @return Puntero a una lista con memoria reservada.
 */
 extern lista_t *lista_crear();
@@ -71,10 +71,9 @@ extern lista_t *lista_crear();
 * @param l Puntero a la lista de elementos.
 * @param elem Elemento a insertar en la lista.
 * @param pos Entero positivo que indica la posicion de inserción (0<pos<n, donde n es el tamaño de la lista).
-* @return
-*   ERROR_LISTA_MEMORIA si no se reserva memoria.
-*   ERROR_LISTA_BUSQUEDA si se pasa una posicion fuera de rango.
-*   TRUE si se inserta el elemento correctamente.
+* @throw ERROR_LISTA_MEMORIA si no se reserva memoria.
+* @throw ERROR_LISTA_BUSQUEDA si se pasa una posicion fuera de rango.
+* @return TRUE si se inserta el elemento correctamente.
 */
 extern int lista_insertar(lista_t *l, elemento_t elem, unsigned int pos);
 

@@ -21,7 +21,7 @@ struct trie {
 };
 
 /**
- * @brief Operación auxiliar: Dado un char, devuelve la posicion del índice entre 0 y 25 del nodo trie que le corresponde al char.
+ * @brief Operación Dado un char, devuelve la posicion del índice entre 0 y 25 del nodo trie que le corresponde al char.
  * @param ch Puntero al caracter.
  * @return Entero entre 0 y 25 si el char está entre 'a' y 'z' (excluyendo ñ). En caso contrario, devuelve -1.
 */
@@ -39,7 +39,7 @@ static int aux_recuperar_posicion_en_alfabeto(char*ch){
 }
 
 /**
- * @brief Operación auxiliar: Dada una posición que corresponde a un nodo del árbol (entre 0 y 25), se recupera el caracter que simboliza dicha posición.
+ * @brief Operación Dada una posición que corresponde a un nodo del árbol (entre 0 y 25), se recupera el caracter que simboliza dicha posición.
  * @param pos Entero entre 0 y 25.
  * @return Caracter entre 'a' y 'z' (excluyendo a ñ).
 */
@@ -49,11 +49,12 @@ static char aux_recuperar_caracter_en_posicion(int pos){
 }
 
 /**
- * @brief Operación auxiliar: Construye un elemento para la cadena de caracteres y la cantidad de repeticiones dada.
+ * @brief Operación Construye un elemento para la cadena de caracteres y la cantidad de repeticiones dada.
  * Si no se reserva memoria, entonces el programa finaliza indicando ERROR_ELEMENTO_MEMORIA.
  * @param cant_repticiones Entero mayor o igual a 1.
  * @param s Puntero a una secuencia de caracteres.
  * @param length_s Entero mayor o igual a 1 que representa la longitud de la cadena s.
+ * @throw ERROR_ELEMENTO_MEMORIA si no se pudo reservar memoria para el elemento o para su contenido.
  * @return Elemento construido y con memoria reservada.
 */
 static elemento_t aux_construir_elemento(int cant_repeticiones, char* s, int length_s){
@@ -87,11 +88,12 @@ static elemento_t aux_construir_elemento(int cant_repeticiones, char* s, int len
 }
 
 /**
- * @brief Operación auxiliar: Dado el árbol T, realiza la carga de los elementos cuya cantidad de repeticiones es mayor o igual a 1 en la lista L.
+ * @brief Operación Dado el árbol T, realiza la carga de los elementos cuya cantidad de repeticiones es mayor o igual a 1 en la lista L.
  * @param L Puntero a la lista.
  * @param T Puntero a la estructura del árbol trie.
  * @param s Arreglo de caracteres de la iteración previa.
  * @param length_s Longitud del arreglo previo.
+ * @throw ERROR_ELEMENTO_MEMORIA si no se pudo reservar memoria para el elemento o para su contenido.
 */
 static void aux_cargar_elementos_en_lista(lista_t *L, struct trie *T, char s[], int length_s){
     ///Inicializa las variables a utilizar.
@@ -215,7 +217,7 @@ lista_t multiset_elementos(multiset_t *m, int (*f)(elemento_t, elemento_t)){
 }
 
 /**
- * @brief Auxiliar: Realiza la liberación de la memoria, esto es, remueve todo dato perteneciente al nodo de la memoria.
+ * @brief Realiza la liberación de la memoria, esto es, remueve todo dato perteneciente al nodo de la memoria.
  * @param nodo Puntero a un nodo del árbol.
 */
 static void aux_liberar_memoria(struct trie *nodo){
@@ -229,7 +231,7 @@ static void aux_liberar_memoria(struct trie *nodo){
 }
 
 /**
- * @brief Auxiliar: Elimina los nodos del árbol de manera recursiva.
+ * @brief Elimina los nodos del árbol de manera recursiva.
  * @param nodo Puntero a un nodo del árbol.
 */
 static void aux_multiset_eliminar(struct trie *nodo){

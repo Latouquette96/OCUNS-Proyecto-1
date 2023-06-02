@@ -160,6 +160,8 @@ static int aux_es_archivo_txt(char *name){
 * @brief Dado un controlador del directorio, se recopila todos los archivos de textos existentes en dicho directorio y se retorna un puntero a punteros de cadenas de caracteres.
 * @param d Puntero al controlador de directorio.
 * @param cant_filas Puntero a un entero, donde se almacenará la cantidad de archivos de texto encontrados.
+* @throw ERROR_CUENTAPALABRAS_APERTURA_ARCHIVO si no se logra abrir el archivo en cuestion.
+* @throw ERROR_CUENTAPALABRAS_MEMORIA si no se logra reservar memoria para la cadena.
 * @return Puntero a punteros de cadenas de caracteres que representan los nombres de los archivos de textos encontrados en el directorio dado.
 */
 static char** cuentapalabras_recopilar_nombres_archivos_txt(DIR *d, int*cant_filas){
@@ -260,6 +262,7 @@ static int aux_es_palabra_sin_caracteres_especiales(char* ch){
 * @brief Recorre recursivamente la próxima cadena a recuperar por del archivo y la devuelve.
 * @param f Puntero a archivo.
 * @param longitud_cadena Longitud de la cadena a leer.
+* @throw ERROR_CUENTAPALABRAS_MEMORIA Si no se logró reservar memoria para la cadena.
 * @return Puntero a cadena creada o NULL si la cadena en cuestión en un caracter separador de palabras.
 */
 static char * aux_recuperar_cadena(FILE *f, int longitud_cadena){
@@ -297,6 +300,7 @@ static char * aux_recuperar_cadena(FILE *f, int longitud_cadena){
  * @brief De acuerdo a la ruta al archivo dada, se procede a leer el archivo de texto y se recopila cada palabra y se las contabiliza.
  * @param path Puntero a cadena de caracteres que conforma la ruta hacia el archivo a leer.
  * @param m_total Multiset donde se cargarán las palabras leidas en el documento.
+ * @throw ERROR_CUENTAPALABRAS_APERTURA_ARCHIVO si no se pudo abrir el archivo.
  * @return Multiset con las palabras contadas pertenecientes al archivo dado.
 */
 static multiset_t* aux_cargar_multiset(char*path, multiset_t *m_total){
@@ -370,12 +374,14 @@ static void aux_exportar_multiset_a_archivo(FILE *file, char* nombre_archivo, mu
 * @param directorio Puntero a cadena de caracteres que representa el directorio.
 * @param nombre_archivo Puntero a punteros de cadenas de caracteres que representan los nombres de los archivos.
 * @param cant_filas Entero que indica la cantidad de archivos de textos a leer.
+* @throw ERROR_CUENTAPALABRAS_MEMORIA Si no es reservada memoria para la creación del puntero al puntero de un multiset.
+* @throe ERROR_CUENTAPALABRAS_CREACION_ARCHIVO_SALIDA Si no se pudo crear los archivos cadauno.out o totales.out.
 */
 static void cuentapalabras_construir_archivos_salida(char* directorio, char** nombre_archivo, int cant_filas){
     //Reservo memoria para un puntero a puntero de multiset con el fin de emplear multiset_eliminar.
     multiset_t **m = (multiset_t**) malloc(sizeof(multiset_t*));
     if (m==NULL){
-        printf("Error %d: Memoria no reservada por el sistema\n", ERROR_CUENTAPALABRAS_MEMORIA);
+        printf("Error %d: No se pudo reservar memoria para el multiset.\n", ERROR_CUENTAPALABRAS_MEMORIA);
         exit(ERROR_CUENTAPALABRAS_MEMORIA);
     }
     //Se construye el multiset donde se acumularan todas las palabras de todos los archivos.

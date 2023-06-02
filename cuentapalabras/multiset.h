@@ -24,8 +24,8 @@ typedef struct trie multiset_t;
 
 /**
  * @brief Crea un multiset vacio de palabras y lo devuelve.
- * Finaliza con ERROR_MULTISET_MEMORIA si el programa no logra reservar memoria para el multiset.
- * @return Puntero al multiset construido.
+ * @throw ERROR_MULTISET_MEMORIA si el programa no logra reservar memoria para el multiset.
+ * @return Puntero al multiset construido o NULL en caso de error.
 */
 extern multiset_t *multiset_crear();
 
@@ -34,6 +34,8 @@ extern multiset_t *multiset_crear();
  * Si la reservación de memoria no se realiza correctamente, puede finalizar la ejecución del programa con ERROR_MULTISET_MEMORIA.
  * @param m Puntero al multiset.
  * @param s Puntero al inicio de la cadena de caracteres.
+ * @throw ERROR_MULTISET_MEMORIA si no se pudo crear el multiset.
+ * @throw ERROR_ELEMENTO_MEMORIA si no se pudo reservar memoria para el elemento o para su contenido.
 */
 extern void multiset_insertar(multiset_t *m, char *s);
 

@@ -1,7 +1,7 @@
 /**
 * @file define.h
 * @brief Archivo encabezado de declaraciones.
-* Este archivo modela las constantes y operaciones que se podr�n utilizar en todo el programa.
+* Este archivo modela constantes que pueden ser utilizadas desde cualquier parte del programa.
 * @author Comision N°17 (David Emanuel Latouquette - Otto Krause)
 */
 
